@@ -23,7 +23,9 @@ Items which are missing and must be added:
 3. Network/mapped drives are not currently supported - this is a serious limitation for those people using a NAS.  
 4. The 'GUI/front-end' to manage and view the data does not yet exist.
 5. There is no support for folders/files/categories which have been removed.
-6. Only files at the root level are currently associated with a category.
+6. Only files at the root level are currently associated with a category. There should be no folder depth limit.
+7. Perhaps add a search capability to find files of a specific category
+	
 
 (I will get to these 'one day')
 
