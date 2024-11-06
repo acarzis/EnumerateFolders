@@ -7,7 +7,8 @@ namespace EnumerateFolders.Utils
 {
     public class DriveOperations
     {
-        static List<Tuple<string, long>> mRootSubFolderInfo = new List<Tuple<string, long>>();
+        // TO DO:  Get rid of this...
+        public static List<Tuple<string, long>> mRootSubFolderInfo = new List<Tuple<string, long>>();  // name, size
 
         public struct MyFileInfo
         {
@@ -66,50 +67,6 @@ namespace EnumerateFolders.Utils
             }
         }
 
-        // TO DO: change input such that folderpath instead of di
-        public static long GetFolderSize(DirectoryInfo di, ref long totalFiles, ref long totalFolders, int level)
-        {
-            long folderSize = 0;
-            int currentLevel = level;
-
-            try
-            {
-                FileInfo[] fis = di.GetFiles();
-                foreach (FileInfo fi in fis)
-                {
-                    folderSize += fi.Length;
-                    totalFiles += 1;
-                }
-            }
-            catch {
-                return 0;
-            }
-
-            try
-            {
-                DirectoryInfo[] dis = di.GetDirectories();
-
-                foreach (DirectoryInfo d in dis)
-                {
-                    totalFolders += 1;
-                    currentLevel += 1;
-                    long sz = GetFolderSize(d, ref totalFiles, ref totalFolders, currentLevel);
-                    folderSize += sz;
-
-                    if (level == 1)
-                    {
-                        mRootSubFolderInfo.Add(new Tuple<string, long>(d.Name, sz));
-                    }
-                }
-            }
-            catch {
-                return 0;
-            }
-
-            return folderSize;
-        }
-
-
         public void EnumerateDirectoryInfo(List<string> files, ref List<MyFileInfo> filesinfo)
         {
             foreach (var f in files)
@@ -157,6 +114,87 @@ namespace EnumerateFolders.Utils
                     continue;
                 }
             }
+        }
+
+        // TO DO: Perhaps change input such that folderpath instead of di
+        public static long GetFolderSize(DirectoryInfo di, ref long totalFiles, ref long totalFolders, int level)
+        {
+            long folderSize = 0;
+            int currentLevel = level;
+
+            try
+            {
+                FileInfo[] fis = di.GetFiles();
+                foreach (FileInfo fi in fis)
+                {
+                    folderSize += fi.Length;
+                    totalFiles += 1;
+                }
+            }
+            catch
+            {
+                return 0;
+            }
+
+            try
+            {
+                DirectoryInfo[] dis = di.GetDirectories();
+
+                foreach (DirectoryInfo d in dis)
+                {
+                    totalFolders += 1;
+                    currentLevel += 1;
+                    long sz = GetFolderSize(d, ref totalFiles, ref totalFolders, currentLevel);
+                    folderSize += sz;
+
+                    if (level == 1)
+                    {
+                        mRootSubFolderInfo.Add(new Tuple<string, long>(d.Name, sz));
+                    }
+                }
+            }
+            catch
+            {
+                return 0;
+            }
+
+            return folderSize;
+        }
+
+        public static bool GetSubFileFolderDetails(DirectoryInfo di, string[] extensionList, ref List<string> fileList)
+        {
+            try
+            {
+                FileInfo[] fis = di.GetFiles();
+                foreach (FileInfo fi in fis)
+                {
+                    // Path.GetExtension also returns the period
+                    string extension = Path.GetExtension(fi.FullName).Replace(".", "");
+                    if (extensionList.Contains(extension))
+                    {
+                        fileList.Add(fi.FullName);
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            try
+            {
+                DirectoryInfo[] dis = di.GetDirectories();
+
+                foreach (DirectoryInfo d in dis)
+                {
+                    GetSubFileFolderDetails(d, extensionList, ref fileList);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

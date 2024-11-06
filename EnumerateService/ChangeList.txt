@@ -1,2 +1,5 @@
 ﻿2024/11/06 - added support for mapped drive locations
-
+             categories can now be assigned to a folder
+             removed code that computes folder size - this is extremely slow. to consider: new approach
+             now computes categories for folders specified in the category table
+             bug fixes

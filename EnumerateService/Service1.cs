@@ -1,4 +1,7 @@
-﻿using System.ServiceProcess;
+﻿#define DEBUG
+
+
+using System.ServiceProcess;
 using System.Runtime.InteropServices;
 using System;
 using System.Threading;
@@ -99,8 +102,7 @@ namespace EnumerateService
             {
                 eventLog1.WriteEntry("Service Startup");
 
-                ctx = new SqlSrvCtx();
-                repo = new FolderInfoRepository(ctx);
+                repo = new FolderInfoRepository();
 
                 timer.Interval = 15000; // in milliseconds, 15 secs
                 timer.Elapsed += new System.Timers.ElapsedEventHandler(this.OnTimer);
@@ -156,8 +158,7 @@ namespace EnumerateService
 
                 try
                 {
-                    ctx = new SqlSrvCtx();
-                    repo = new FolderInfoRepository(ctx);
+                    repo = new FolderInfoRepository();
 
                     IEnumerable<Drive> drives = new List<Drive>();
                     repo.GetDriveList(out drives);
@@ -168,8 +169,12 @@ namespace EnumerateService
                     {
                         d.LogicalDrive = MappedDriveResolver.ResolveToUNC(d.LogicalDrive);
 
-                        if (d.ScanPriority >= 0)
+                        if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
                         {
+                            #if DEBUG
+                                Console.WriteLine("Processing Drive:  " + d.LogicalDrive);
+                            #endif
+
                             eventLog1.WriteEntry("Processing Drive:  " + d.LogicalDrive);
 
                             repo.AddFolder(d.LogicalDrive);
@@ -181,12 +186,20 @@ namespace EnumerateService
 
                             if ((fldrsize == 0) || (lastchecked >= lastmodified))
                             {
+                                #if DEBUG
+                                     Console.WriteLine("Updating Folder Details:  " + d.LogicalDrive);
+                                #endif
+
                                 eventLog1.WriteEntry("Updating Folder Details:  " + d.LogicalDrive);
 
                                 DirectoryInfo di = new DirectoryInfo(d.LogicalDrive);
                                 long totalFiles = 0;
                                 long totalFolders = 0;
-                                long foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1);
+                                DriveOperations.mRootSubFolderInfo.Clear();
+                                
+                                // long foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1); // very slow, recursive search
+                                long foldersize = 0;
+                                
                                 repo.AddFolderDetails(d.LogicalDrive, String.Empty, foldersize, di.LastWriteTimeUtc, true);
 
                                 List<string> folderlist = new List<string>();
@@ -197,13 +210,22 @@ namespace EnumerateService
                                 
                                 foreach (string f in folderlist)
                                 {
+                                    #if DEBUG
+                                        Console.WriteLine("Adding Folder:  " + f);
+                                    #endif
+
                                     eventLog1.WriteEntry("Adding Folder:  " + f);
                                     repo.AddFolder(f);  // f = fullpath
 
                                     di = new DirectoryInfo(f);
                                     totalFolders = 0;
                                     totalFiles = 0;
-                                    foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1); // also gets subfolder info
+                                    DriveOperations.mRootSubFolderInfo.Clear();
+
+                                    // foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1); // also gets subfolder info
+                                    foldersize = 0;
+
+                                    // TO DO: check if this folder is part of Categories.FolderLocations
                                     repo.AddFolderDetails(f, String.Empty, foldersize, di.LastWriteTimeUtc, true);
                                 }
 
@@ -218,8 +240,39 @@ namespace EnumerateService
                                         if (fileCategory != null)
                                             cat = fileCategory.Name;
                                     }
-                                    repo.AddFile(Path.GetDirectoryName(f), Path.GetFileName(f), cat, fileInfo.Length);
+                                    repo.AddFile(Path.GetDirectoryName(f), Path.GetFileName(f), String.Empty, cat, fileInfo.Length);
                                 }
+                            }
+                        }
+                    }
+
+                    // let's scan the sub-folders where category is specified
+                    categories = categories.Where(c => !string.IsNullOrEmpty(c.FolderLocations)).ToList();
+
+                    foreach (Category category in categories)
+                    {
+                        string[] locations = category.FolderLocations.Split(',');
+                        foreach (string location in locations)
+                        {
+                            #if DEBUG
+                                Console.WriteLine("Processing FolderLocation: " + location);
+                            #endif
+
+                            List<string> filelist = new List<string>();
+                            DirectoryInfo di = new DirectoryInfo(location);
+
+                            // record the folder location with it's category; ignored if it exists
+                            repo.AddFolder(MappedDriveResolver.ResolveToUNC(location), category.Name);
+                            repo.AddFolderDetails(MappedDriveResolver.ResolveToUNC(location), category.Name, 0, di.LastWriteTimeUtc, true);
+
+                            // check the sub-folder info
+                            DriveOperations.GetSubFileFolderDetails(di, category.Extensions.Split(','), ref filelist);
+
+                            foreach (string file in filelist)
+                            {
+                                string resolvedpath = MappedDriveResolver.ResolveToUNC(file);
+                                FileInfo fileInfo = new FileInfo(resolvedpath);
+                                repo.AddFile(Path.GetDirectoryName(resolvedpath), Path.GetFileName(resolvedpath), category.Name, category.Name, fileInfo.Length);
                             }
                         }
                     }

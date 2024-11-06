@@ -26,6 +26,8 @@ namespace EnumerateFolders.Migrations
 
                     b.Property<string>("Extensions");
 
+                    b.Property<string>("FolderLocations");
+
                     b.HasKey("Name");
 
                     b.ToTable("Categories");

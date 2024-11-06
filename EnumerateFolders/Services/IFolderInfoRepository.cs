@@ -43,7 +43,7 @@ namespace EnumerateFolders.Services
         string GetFolderCategory(string folderpath);
         bool GetFolderDetails(string folderpath, out Category cat, out long foldersize, out DateTime lastchecked, out DateTime lastmodified);
         bool GetAllFolders(out IEnumerable<Folder> folders);
-        bool AddFile(string folderpath, string filepath, string category, long foldersize);
+        bool AddFile(string folderpath, string filepath, string foldercategory = "", string filecategory = "", long filesize = 0);
         bool AddFileDetails(string filepath, string category, long filesize);
         bool GetDriveList(out IEnumerable<Drive> drives);
         bool AddDrive(string drive, string name, int priority = 0);

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnumerateFolders.Migrations
 {
     [DbContext(typeof(SqlSrvCtx))]
-    [Migration("20241103022054_InitialMigration")]
+    [Migration("20241106220955_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,6 +27,8 @@ namespace EnumerateFolders.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Extensions");
+
+                    b.Property<string>("FolderLocations");
 
                     b.HasKey("Name");
 

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using EnumerateFolders.Database;
 using EnumerateFolders.Entities;
 using EnumerateFolders.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using File = EnumerateFolders.Entities.File;
 
 
@@ -15,30 +18,15 @@ namespace EnumerateFolders.Services
     {
         private SqlSrvCtx _context;
 
-        public FolderInfoRepository(SqlSrvCtx context)
+        public FolderInfoRepository()
         {
-            _context = context;
-        }
-
-        public SqlSrvCtx GetSqlContext()
-        {
-            return _context;
         }
 
         public IEnumerable<Category> GetCategories()
         {
             _context = new SqlSrvCtx();
 
-            List<Category> result = new List<Category>();
-            var qry = _context.Categories.ToList();
-            foreach (Category c in qry)
-            {
-                Category cat = new Category();
-                cat.Name = c.Name;
-                cat.Extensions = c.Extensions;
-                result.Add(cat);
-            }
-            return result;
+            return _context.Categories.ToList();
         }
 
         public bool CategoryExists(string category, out Category cat)
@@ -121,7 +109,7 @@ namespace EnumerateFolders.Services
                 _context = new SqlSrvCtx();
 
                 Category cat = new Category();
-                Folder folder = _context.Folders.FirstOrDefault(f => f.FullPathHash == Hash.getHashSha256(folderpath));
+                Folder folder = _context.Folders.Include(p => p.Category).FirstOrDefault(f => f.FullPathHash == Hash.getHashSha256(folderpath));
                 if (folder != null)
                 {
                     if (!string.IsNullOrEmpty(category))
@@ -146,7 +134,8 @@ namespace EnumerateFolders.Services
                         folder.LastModified = lastmodified;
                     }
 
-                    _context.SaveChanges(true);
+                    _context.Update(folder);
+                    _context.SaveChanges();
                     return true;
                 }
                 else
@@ -239,7 +228,7 @@ namespace EnumerateFolders.Services
             return true;
         }
 
-        public bool AddFile(string folderpath, string filepath, string category = "", long filesize = 0)
+        public bool AddFile(string folderpath, string filepath, string foldercategory = "", string filecategory = "", long filesize = 0)
         {
             try
             {
@@ -255,9 +244,9 @@ namespace EnumerateFolders.Services
                     file = new File();
                 }
 
-                if (!string.IsNullOrEmpty(category))
+                if (!string.IsNullOrEmpty(filecategory))
                 {
-                    if (CategoryExists(category, out cat))
+                    if (CategoryExists(filecategory, out cat))
                     {
                         file.Category = cat;
                         categoryExists = true;
@@ -266,7 +255,16 @@ namespace EnumerateFolders.Services
 
                 if (!FolderExists(folderpath, out folder))
                 {
-                    AddFolder(folderpath, category);
+                    string foldercat = String.Empty;
+                    if (!string.IsNullOrEmpty(foldercategory))
+                    {
+                        if (CategoryExists(foldercategory, out cat))
+                        {
+                            foldercat = cat.Name;
+                        }
+                    }
+
+                    AddFolder(folderpath, foldercat);
                     FolderExists(folderpath, out folder);
                 }
                 file.Folder = folder;
@@ -316,7 +314,8 @@ namespace EnumerateFolders.Services
                     {
                         file.FileSize = filesize;
                     }
-                    _context.SaveChanges(true);
+                    _context.Update(file);
+                    _context.SaveChanges();
                     return true;
                 }
                 else
@@ -358,6 +357,7 @@ namespace EnumerateFolders.Services
                 {
                     d.Name = name;
                     d.ScanPriority = priority;
+                    _context.Update(d);
                 }
                 else
                 {
@@ -367,7 +367,7 @@ namespace EnumerateFolders.Services
                     d.ScanPriority = priority;
                     _context.Drives.Add(d);
                 }
-                _context.SaveChanges(true);
+                _context.SaveChanges();
             }
             catch (Exception)
             {

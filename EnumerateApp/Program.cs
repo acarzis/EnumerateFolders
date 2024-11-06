@@ -1,11 +1,9 @@
-﻿using EnumerateFolders.Database;
-using EnumerateFolders.Entities;
+﻿using EnumerateFolders.Entities;
 using EnumerateFolders.Services;
 using EnumerateFolders.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using static EnumerateFolders.Utils.DriveOperations;
 
 namespace EnumerateFolders
 {
@@ -13,14 +11,29 @@ namespace EnumerateFolders
     {
         static void Main(string[] args)
         {
-            SqlSrvCtx ctx = new SqlSrvCtx();
-            FolderInfoRepository repo = new FolderInfoRepository(ctx);
+            FolderInfoRepository repo = new FolderInfoRepository();
 
 
             // let's add some categories
             Category cat = new Category();
             cat.Name = "Music";
             cat.Extensions = "mp3,wav,flac,m4a,vob";
+            cat.FolderLocations = "Y:\\";
+            repo.AddCategory(cat);
+
+            cat = new Category();
+            cat.Name = "Documents";
+            cat.Extensions = "txt,doc,docx,pdf,htm,html,xls,xlsx,odt,ppt,pptx,rtf,wpd,log";
+            repo.AddCategory(cat);
+
+            cat = new Category();
+            cat.Name = "Pictures";
+            cat.Extensions = "jpeg,jpg,png,gif,tiff,bmp,webp,psd,raw";
+            repo.AddCategory(cat);
+
+            cat = new Category();
+            cat.Name = "Videos";
+            cat.Extensions = "mp4,mov,avi,wmv,flv,f4v,mkv,webm,avchd,mpeg,mpg,ogv,m4v";
             repo.AddCategory(cat);
 
             List<Category> categories = (List<Category>)repo.GetCategories();
@@ -29,6 +42,16 @@ namespace EnumerateFolders
                 Console.WriteLine("{0} - {1} ", c.Name, c.Extensions);
             }
 
+            // add the drive list to the repo.
+            string[] drives = DriveOperations.EnumerateDrives();
+            foreach (string drive in drives)
+            {
+                DriveInfo d = new DriveInfo(drive);
+                Console.WriteLine("Drive {0} added to the repo", drive);
+                repo.AddDrive(drive, d.VolumeLabel);
+            }
+
+            Environment.Exit(0);
 
 
 

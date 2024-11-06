@@ -12,7 +12,8 @@ namespace EnumerateFolders.Migrations
                 columns: table => new
                 {
                     Name = table.Column<string>(nullable: false),
-                    Extensions = table.Column<string>(nullable: true)
+                    Extensions = table.Column<string>(nullable: true),
+                    FolderLocations = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
