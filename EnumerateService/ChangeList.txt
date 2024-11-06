@@ -1,0 +1,2 @@
+﻿2024/11/06 - added support for mapped drive locations
+

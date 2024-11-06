@@ -9,7 +9,6 @@ using EnumerateFolders.Entities;
 using System.Linq;
 using EnumerateFolders.Utils;
 using System.IO;
-using System.ComponentModel.DataAnnotations;
 
 namespace EnumerateService
 {
@@ -167,6 +166,8 @@ namespace EnumerateService
 
                     foreach (Drive d in drives)
                     {
+                        d.LogicalDrive = MappedDriveResolver.ResolveToUNC(d.LogicalDrive);
+
                         if (d.ScanPriority >= 0)
                         {
                             eventLog1.WriteEntry("Processing Drive:  " + d.LogicalDrive);
@@ -202,7 +203,7 @@ namespace EnumerateService
                                     di = new DirectoryInfo(f);
                                     totalFolders = 0;
                                     totalFiles = 0;
-                                    foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1);
+                                    foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1); // also gets subfolder info
                                     repo.AddFolderDetails(f, String.Empty, foldersize, di.LastWriteTimeUtc, true);
                                 }
 

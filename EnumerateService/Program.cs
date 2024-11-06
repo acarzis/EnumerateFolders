@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Configuration.Install;
+﻿using System.Configuration.Install;
 using System.Reflection;
 using System;
 using System.ServiceProcess;
