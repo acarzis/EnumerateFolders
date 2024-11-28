@@ -83,8 +83,12 @@ namespace EnumerateFolders.Services
                 folder.Name = Path.GetFileName(folderpath);
                 folder.Path = Path.GetDirectoryName(folderpath);
 
+                // below is to accomodate for mapped drives
                 if (string.IsNullOrEmpty(folder.Path))
+                {
                     folder.Path = Path.GetPathRoot(folderpath);
+                    folder.Name = String.Empty;
+                }
 
                 folder.FullPathHash = Hash.getHashSha256(folderpath);
                 folder.FolderSize = foldersize;

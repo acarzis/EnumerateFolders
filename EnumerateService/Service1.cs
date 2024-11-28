@@ -194,7 +194,15 @@ namespace EnumerateService
 
                     if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))
                     {
-                        DriveOperations.EnumerateFiles(fullpath, "*.*", ref filelist);
+                        try
+                        {
+                            DriveOperations.EnumerateFiles(fullpath, "*.*", ref filelist);
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine("Access exception, directory: " + Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name));
+                            repo.RemoveQueueItem(nextitemtoprocess.Id);
+                        }
 
                         foreach (string f in filelist)
                         {
@@ -214,11 +222,29 @@ namespace EnumerateService
 #if DEBUG
                             Console.WriteLine("Adding file, directory: " + Path.GetDirectoryName(f) + ", filename: " + Path.GetFileName(f) + " to the repo");
 #endif
+
+                            // check if sub-folder matches a category 
+                            string catname = String.Empty;
+                            Tuple<string, string> match = categoryPaths.Find(t => fullpath.Contains(t.Item1));
+                            if (match != null)
+                            {
+                                catname = match.Item2;
+                            }
+                            repo.AddFolderDetails(fullpath, catname, 0, di.LastWriteTimeUtc, true); // update lastchecked date
                         }
 
                         // add all the sub-folders for future processing
                         List<string> folderlist = new List<string>();
-                        DriveOperations.EnumerateFolders(Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name), "*.*", ref folderlist);
+
+                        try
+                        {
+                            DriveOperations.EnumerateFolders(Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name), "*.*", ref folderlist);
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine("Access exception, directory: " + Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name));
+                            repo.RemoveQueueItem(nextitemtoprocess.Id);
+                        }
 
                         foreach (string f in folderlist)
                         {
@@ -236,12 +262,11 @@ namespace EnumerateService
                                 Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
 #endif
                             }
-
                         }
                     }
                     repo.RemoveQueueItem(nextitemtoprocess.Id);
 
-                    // get the category name if it exists
+                    // get the category name if it exists.
                     string categoryname = String.Empty;
                     Tuple<string, string> found = categoryPaths.Find(t => t.Item1.Contains(fullpath));
                     if (found != null) 
@@ -290,193 +315,13 @@ namespace EnumerateService
                 object waitTimeOut = new object();
                 lock (waitTimeOut)
                 {
-                    Monitor.Wait(waitTimeOut, TimeSpan.FromSeconds(Globals.OnTimerWaitDelaySecs));
+                    Monitor.Wait(waitTimeOut, TimeSpan.FromMilliseconds(Globals.OnTimerWaitDelayMSecs));
                 }
 
                 timer.Start();
             }
 
             oSignalEvent.Set();
-            return;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            oSignalEvent.Reset();
-
-            if ((running == false) && (shuttingDown == false))
-            {
-                eventLog1.WriteEntry("Timer Operation Started");
-
-                running = true;
-
-                try
-                {
-                    repo = new FolderInfoRepository();
-
-                    IEnumerable<Drive> drives = new List<Drive>();
-                    repo.GetDriveList(out drives);
-                    drives = drives.OrderByDescending(s => s.ScanPriority);
-                    IEnumerable<Category> categories = repo.GetCategories();
-
-                    foreach (Drive d in drives)
-                    {
-                        d.LogicalDrive = MappedDriveResolver.ResolveToUNC(d.LogicalDrive);
-
-                        if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
-                        {
-#if DEBUG
-                            Console.WriteLine("Processing Drive:  " + d.LogicalDrive);
-#endif
-
-                            eventLog1.WriteEntry("Processing Drive:  " + d.LogicalDrive);
-
-                            repo.AddFolder(d.LogicalDrive);
-                            Category category = new Category();
-                            long fldrsize = 0;
-                            DateTime lastchecked;
-                            DateTime lastmodified;
-                            repo.GetFolderDetails(d.LogicalDrive, out category, out fldrsize, out lastchecked, out lastmodified);
-
-                            if ((fldrsize == 0) || (lastmodified >= lastchecked))
-                            {
-#if DEBUG
-                                Console.WriteLine("Updating Folder Details:  " + d.LogicalDrive);
-#endif
-
-                                eventLog1.WriteEntry("Updating Folder Details:  " + d.LogicalDrive);
-
-                                DirectoryInfo di = new DirectoryInfo(d.LogicalDrive);
-                                long totalFiles = 0;
-                                long totalFolders = 0;
-                                DriveOperations.mRootSubFolderInfo.Clear();
-
-                                // long foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1); // very slow, recursive search
-                                long foldersize = 0;
-
-                                repo.AddFolderDetails(d.LogicalDrive, String.Empty, foldersize, di.LastWriteTimeUtc, true);
-
-                                List<string> folderlist = new List<string>();
-                                DriveOperations.EnumerateFolders(d.LogicalDrive, "*.*", ref folderlist);
-
-                                List<string> filelist = new List<string>();
-                                DriveOperations.EnumerateFiles(d.LogicalDrive, "*.*", ref filelist);
-
-                                foreach (string f in folderlist)
-                                {
-#if DEBUG
-                                    Console.WriteLine("Adding Folder:  " + f);
-#endif
-
-                                    eventLog1.WriteEntry("Adding Folder:  " + f);
-                                    repo.AddFolder(f);  // f = fullpath
-
-                                    di = new DirectoryInfo(f);
-                                    totalFolders = 0;
-                                    totalFiles = 0;
-                                    DriveOperations.mRootSubFolderInfo.Clear();
-
-                                    // foldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1); // also gets subfolder info
-                                    foldersize = 0;
-
-                                    // TO DO: check if this folder is part of Categories.FolderLocations
-                                    repo.AddFolderDetails(f, String.Empty, foldersize, di.LastWriteTimeUtc, true);
-                                }
-
-                                foreach (string f in filelist)
-                                {
-                                    FileInfo fileInfo = new FileInfo(f);
-                                    Category fileCategory = new Category();
-                                    string cat = String.Empty;
-
-                                    if (repo.GetFileCategory(fileInfo.Extension, out fileCategory))
-                                    {
-                                        if (fileCategory != null)
-                                            cat = fileCategory.Name;
-                                    }
-                                    repo.AddFile(Path.GetDirectoryName(f), Path.GetFileName(f), String.Empty, cat, fileInfo.Length);
-                                }
-                            }
-                        }
-                    }
-
-                    // let's scan the sub-folders where category is specified
-                    categories = categories.Where(c => !string.IsNullOrEmpty(c.FolderLocations)).ToList();
-
-                    foreach (Category category in categories)
-                    {
-                        string[] locations = category.FolderLocations.Split(',');
-                        foreach (string location in locations)
-                        {
-#if DEBUG
-                            Console.WriteLine("Processing FolderLocation: " + location);
-#endif
-
-                            List<string> filelist = new List<string>();
-                            DirectoryInfo di = new DirectoryInfo(location);
-
-                            // record the folder location with it's category; ignored if it exists
-                            repo.AddFolder(MappedDriveResolver.ResolveToUNC(location), category.Name);
-                            repo.AddFolderDetails(MappedDriveResolver.ResolveToUNC(location), category.Name, 0, di.LastWriteTimeUtc, true);
-
-                            // check the sub-folder info
-                            DriveOperations.GetSubFileFolderDetails(di, category.Extensions.Split(','), ref filelist);
-
-                            foreach (string file in filelist)
-                            {
-                                string resolvedpath = MappedDriveResolver.ResolveToUNC(file);
-                                FileInfo fileInfo = new FileInfo(resolvedpath);
-                                repo.AddFile(Path.GetDirectoryName(resolvedpath), Path.GetFileName(resolvedpath), category.Name, category.Name, fileInfo.Length);
-                            }
-                        }
-                    }
-                }
-
-                catch (Exception e)
-                {
-                    eventLog1.WriteEntry("OnTimer Exception: " + e.Message);
-                }
-
-                running = false;
-                eventLog1.WriteEntry("Timer Operation Stopped");
-
-                object waitTimeOut = new object();
-                lock (waitTimeOut)
-                {
-                    Monitor.Wait(waitTimeOut, TimeSpan.FromHours(6));
-                }
-
-                timer.Start();
-            }
-
-            oSignalEvent.Set();
-
-
-
         }
 
         private bool Init()
@@ -501,7 +346,7 @@ namespace EnumerateService
 #if DEBUG
                         Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
 #endif
-                        repo.AddPathToScanQueue(d.LogicalDrive, (int) ScanPriority.MEDLOW); // trailing '\' is not added
+                        repo.AddPathToScanQueue(d.LogicalDrive, (int) ScanPriority.MEDHIGH); // trailing '\' is not added
 
                     }
                 }

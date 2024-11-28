@@ -3,7 +3,7 @@ namespace EnumerateService
 {
     public class Globals
     {
-        public const int OnTimerWaitDelaySecs = 5;
+        public const int OnTimerWaitDelayMSecs = 100;
     }
 
     public enum ScanPriority

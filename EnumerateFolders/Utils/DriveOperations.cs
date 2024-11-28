@@ -41,7 +41,8 @@ namespace EnumerateFolders.Utils
 
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("EnumerateDrives: " + e.Message);
+                throw e;
             }
         }
 
@@ -63,7 +64,8 @@ namespace EnumerateFolders.Utils
 
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("EnumerateFiles: " + e.Message);
+                throw e;
             }
         }
 
