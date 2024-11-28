@@ -3,3 +3,13 @@
              removed code that computes folder size - this is extremely slow. to consider: new approach
              now stores files for folders specified in the category table, including sub-folders
              bug fixes
+
+2024/11/27 - refactored the folder scanning code
+
+2024/11/28 - removed use of WMI via MappedDriveResolver. This was failing when code was executing as a service.
+             I tried various approaches with no luck.
+             Replaced MappedDriveResolver with UNCPath() - a method which uses the registry.
+             
+             Note: The service works fine when run under a microsoft admin user account but not with the windows service account. 
+                   I need to improve upon this. 
+        

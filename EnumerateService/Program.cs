@@ -41,13 +41,15 @@ namespace EnumerateService
                         return 1;
                 }
             }
-
+            
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new Service1()
+                 new Service1()
             };
-            ServiceBase.Run(ServicesToRun);
+            
+            ServiceBase.Run(ServicesToRun);           
+
             return 0;
         }
     }

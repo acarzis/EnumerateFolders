@@ -123,10 +123,39 @@ namespace EnumerateFolders.Utils
             // Get just the drive letter for WMI call
             string driveletter = GetDriveLetter(path);
 
+
             // Query WMI if the drive letter is a network drive, and if so the UNC path for it
+
+            /*
+            ManagementBaseObject InParam = null;
+            ManagementObject mo = new ManagementObject(string.Format("Win32_Service.Name='{0}'", _servicename));
+            // mo.InvokeMethod("Change", new object[] { null, null, null, null, null, null, "zeus\\tempadmin", "4820", null, null, null });
+
+            ManagementClass c = new ManagementClass("Win32_Process");
+            MethodDataCollection t = c.Methods;
+
+            InParam = mo.GetMethodParameters("Change");
+            InParam["DesktopInteract"] = true;
+            InParam["StartName"] = "zeus\\tempadmin";
+            InParam["StartPassword"] = "4820";
+            mo.InvokeMethod("Change", InParam, null);
+            */
+
+            //using (mo)
             using (ManagementObject mo = new ManagementObject())
             {
                 mo.Path = new ManagementPath(string.Format("Win32_LogicalDisk='{0}'", driveletter));
+
+                ManagementScope managementScope;
+                ConnectionOptions connectionOptions;
+                connectionOptions = new ConnectionOptions();
+                connectionOptions.Impersonation = ImpersonationLevel.Impersonate;
+                // connectionOptions.EnablePrivileges = true;
+                managementScope = new ManagementScope("\\root\\cimv2", connectionOptions);
+
+                mo.Scope = managementScope;
+
+                // PROBLEM here !!!
 
                 DriveType driveType = (DriveType)((uint)mo["DriveType"]);
                 string networkRoot = Convert.ToString(mo["ProviderName"]);
@@ -171,6 +200,19 @@ namespace EnumerateFolders.Utils
             string driveletter = GetDriveLetter(path);
 
             // Query WMI if the drive letter is a network drive
+            /*
+            ManagementBaseObject InParam = null;
+            ManagementObject mo = new ManagementObject(string.Format("Win32_Service.Name='{0}'", _servicename));
+            // mo.InvokeMethod("Change", new object[] { null, null, null, null, null, null, "zeus\\tempadmin", "4820", null, null, null });
+
+            InParam = mo.GetMethodParameters("Change");
+            InParam["DesktopInteract"] = true;
+            InParam["StartName"] = "zeus\\tempadmin";
+            InParam["StartPassword"] = "4820";
+            mo.InvokeMethod("Change", InParam, null);
+            */
+
+            // using (mo)
             using (ManagementObject mo = new ManagementObject())
             {
                 mo.Path = new ManagementPath(string.Format("Win32_LogicalDisk='{0}'", driveletter));

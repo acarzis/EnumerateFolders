@@ -11,6 +11,7 @@ using EnumerateFolders.Entities;
 using System.Linq;
 using EnumerateFolders.Utils;
 using System.IO;
+using Microsoft.Win32;
 
 namespace EnumerateService
 {
@@ -174,7 +175,7 @@ namespace EnumerateService
                         locations = category.FolderLocations.Split(',');
                         foreach (string location in locations)
                         {
-                            Tuple<string, string> temp = new Tuple<string, string>(MappedDriveResolver.ResolveToUNC(location), category.Name);
+                            Tuple<string, string> temp = new Tuple<string, string>(UNCPath(location), category.Name);
                             categoryPaths.Add(temp);
                         }
                     }
@@ -269,7 +270,7 @@ namespace EnumerateService
                     // get the category name if it exists.
                     string categoryname = String.Empty;
                     Tuple<string, string> found = categoryPaths.Find(t => t.Item1.Contains(fullpath));
-                    if (found != null) 
+                    if (found != null)
                     {
                         categoryname = found.Item2;
                     }
@@ -284,7 +285,7 @@ namespace EnumerateService
                         lastmodified = DateTime.UtcNow;
                         exists = false;
 
-                        string path = MappedDriveResolver.ResolveToUNC(location);
+                        string path = UNCPath(location);
                         if (path.EndsWith("\\"))
                             path = path.Remove(path.Length - 1);
 
@@ -296,9 +297,10 @@ namespace EnumerateService
 
                         if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))          // TO DO: handle folder sizes
                         {
-                            repo.AddPathToScanQueue(MappedDriveResolver.ResolveToUNC(location), (int)ScanPriority.HIGH);
+                            repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
+
 #if DEBUG
-                            Console.WriteLine("Adding category folder location: " + location + " (" + MappedDriveResolver.ResolveToUNC(location) + ") to the scan queue");
+                            Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
 #endif
                         }
                     }
@@ -306,7 +308,7 @@ namespace EnumerateService
 
                 catch (Exception e)
                 {
-                    eventLog1.WriteEntry("OnTimer Exception: " + e.Message);
+                    eventLog1.WriteEntry("OnTimer Exception:  " + e.ToString());
                 }
 
                 running = false;
@@ -339,14 +341,14 @@ namespace EnumerateService
 
                 foreach (Drive d in drives)
                 {
-                    d.LogicalDrive = MappedDriveResolver.ResolveToUNC(d.LogicalDrive);
+                    d.LogicalDrive = UNCPath(d.LogicalDrive);
 
                     if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
                     {
 #if DEBUG
                         Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
 #endif
-                        repo.AddPathToScanQueue(d.LogicalDrive, (int) ScanPriority.MEDHIGH); // trailing '\' is not added
+                        repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
 
                     }
                 }
@@ -358,5 +360,22 @@ namespace EnumerateService
             }
             return result;
         }
+
+        // as per :  https://stackoverflow.com/questions/2067075/how-do-i-determine-a-mapped-drives-actual-path
+        private static string UNCPath(string path)
+        {
+            if (!path.StartsWith(@"\\"))
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Network\\" + path[0]))
+                {
+                    if (key != null)
+                    {
+                        return key.GetValue("RemotePath").ToString() + path.Remove(0, 2).ToString();
+                    }
+                }
+            }
+            return path;
+        }
+
     }
 }
