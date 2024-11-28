@@ -13,6 +13,7 @@ namespace EnumerateFolders.Database
         public DbSet<Folder> Folders { get; set; }
         public DbSet<File> Files { get; set; }
         public DbSet<Drive> Drives { get; set; }
+        public DbSet<ToScanQueue> ToScanQueue { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

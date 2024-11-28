@@ -13,7 +13,6 @@ namespace EnumerateFolders
         {
             FolderInfoRepository repo = new FolderInfoRepository();
 
-
             // let's add some categories
             Category cat = new Category();
             cat.Name = "Music";

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using EnumerateFolders.Database;
 using EnumerateFolders.Entities;
 using EnumerateFolders.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using File = EnumerateFolders.Entities.File;
 
 
@@ -25,7 +22,6 @@ namespace EnumerateFolders.Services
         public IEnumerable<Category> GetCategories()
         {
             _context = new SqlSrvCtx();
-
             return _context.Categories.ToList();
         }
 
@@ -163,7 +159,7 @@ namespace EnumerateFolders.Services
             }
             catch (Exception)
             {
-                return 0;                    
+                return 0;
             }
             return 0;
         }
@@ -388,7 +384,7 @@ namespace EnumerateFolders.Services
                     fileExtension = fileExtension.Substring(1);
 
                 IEnumerable<Category> categories = GetCategories();
-                foreach (Category category in categories) 
+                foreach (Category category in categories)
                 {
                     string[] words = category.Extensions.Split(',');
                     foreach (string word in words)
@@ -427,6 +423,62 @@ namespace EnumerateFolders.Services
             {
                 folder = null;
                 return false;
+            }
+        }
+
+        public void AddPathToScanQueue(string fullpath, int priority)
+        {
+            try
+            {
+                _context = new SqlSrvCtx();
+
+                ToScanQueue toScanQueue = new ToScanQueue();
+                toScanQueue.FullPathHash = Hash.getHashSha256(fullpath);
+                toScanQueue.Name = Path.GetFileName(fullpath);
+                string directoryname = Path.GetDirectoryName(fullpath);
+                toScanQueue.Path = String.IsNullOrEmpty(directoryname) ? Path.GetPathRoot(fullpath) : directoryname;  // this will remove any trailing '\'
+                toScanQueue.Priority = priority;
+                _context.ToScanQueue.Add(toScanQueue);
+                _context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public ToScanQueue GetNextQueueItem()
+        {
+            try
+            {
+                _context = new SqlSrvCtx();
+                return _context.ToScanQueue.OrderBy(s => s.Id).OrderByDescending(s => s.Priority).FirstOrDefault();
+                // return _context.ToScanQueue.OrderByDescending(s => s.Priority).FirstOrDefault();
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public void RemoveQueueItem(long queueId)
+        {
+            try
+            {
+                _context = new SqlSrvCtx();
+
+                var itemToRemove = _context.ToScanQueue.SingleOrDefault(x => x.Id == queueId);
+
+                if (itemToRemove != null)
+                {
+                    _context.ToScanQueue.Remove(itemToRemove);
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
     }

@@ -4,14 +4,16 @@ using EnumerateFolders.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EnumerateFolders.Migrations
 {
     [DbContext(typeof(SqlSrvCtx))]
-    partial class SqlSrvCtxModelSnapshot : ModelSnapshot
+    [Migration("20241127161220_002")]
+    partial class _002
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,8 +106,6 @@ namespace EnumerateFolders.Migrations
                     b.Property<string>("Name");
 
                     b.Property<string>("Path");
-
-                    b.Property<int>("Priority");
 
                     b.HasKey("Id");
 

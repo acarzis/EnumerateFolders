@@ -278,9 +278,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\Drive.cs" />
+    <Compile Include="Entities\ToScanQueue.cs" />
     <Compile Include="Migrations\20241106220955_InitialMigration.cs" />
     <Compile Include="Migrations\20241106220955_InitialMigration.Designer.cs">
       <DependentUpon>20241106220955_InitialMigration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20241127161220_002.cs" />
+    <Compile Include="Migrations\20241127161220_002.Designer.cs">
+      <DependentUpon>20241127161220_002.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20241127170402_003.cs" />
+    <Compile Include="Migrations\20241127170402_003.Designer.cs">
+      <DependentUpon>20241127170402_003.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\SqlSrvCtxModelSnapshot.cs" />
     <Compile Include="Utils\MappedDriveResolver.cs" />

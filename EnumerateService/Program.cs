@@ -1,6 +1,4 @@
-﻿using System.Configuration.Install;
-using System.Reflection;
-using System;
+﻿using System;
 using System.ServiceProcess;
 using System.Threading;
 
@@ -20,12 +18,12 @@ namespace EnumerateService
                 {
                     case "-install":
                         // Below does not work. Use SC CREATE xxxx
-                        ManagedInstallerClass.InstallHelper(new string[] { Assembly.GetExecutingAssembly().Location });
+                        //ManagedInstallerClass.InstallHelper(new string[] { Assembly.GetExecutingAssembly().Location });
                         break;
  
                     case "-uninstall":
                         // Below does not work. Use SC DELETE xxxx
-                        ManagedInstallerClass.InstallHelper(new string[] { "/u", Assembly.GetExecutingAssembly().Location });
+                        //ManagedInstallerClass.InstallHelper(new string[] { "/u", Assembly.GetExecutingAssembly().Location });
                         break;
 
                     case "-console":
