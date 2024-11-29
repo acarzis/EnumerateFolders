@@ -13,3 +13,4 @@
              Note: The service works fine when run under a microsoft admin user account but not with the windows service account. 
                    I need to improve upon this. 
         
+2024/11/29 - added a simple WPF gui
