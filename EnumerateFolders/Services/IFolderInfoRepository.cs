@@ -1,7 +1,7 @@
 ﻿using EnumerateFolders.Entities;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using File = EnumerateFolders.Entities.File;
 
 
 namespace EnumerateFolders.Services
@@ -22,6 +22,7 @@ namespace EnumerateFolders.Services
         // GetAllFolders(out folders)
         // AddFile(folderpath, filepath, category, size) - category and size are optional
         // AddFileDetails(string filepath, string category, long filesize)
+        // GetAllFiles() - returns all files
         // GetDriveList(out drives)
         // AddDrive(drive, name, priority) - priority is optional
         // GetFileCategory(fileExtension, out category);
@@ -45,9 +46,15 @@ namespace EnumerateFolders.Services
         bool GetAllFolders(out IEnumerable<Folder> folders);
         bool AddFile(string folderpath, string filepath, string foldercategory = "", string filecategory = "", long filesize = 0);
         bool AddFileDetails(string filepath, string category, long filesize);
+        IEnumerable<File> GetAllFiles();
         bool GetDriveList(out IEnumerable<Drive> drives);
         bool AddDrive(string drive, string name, int priority = 0);
         bool GetFileCategory(string fileExtension, out Category cat);
         bool FolderExists(string folderpath, out Folder folder);
+
+        // for support of adding a folder to the scan queue:
+        void AddPathToScanQueue(string fullpath, int priority);
+        ToScanQueue GetNextQueueItem();
+        void RemoveQueueItem(long queueId);
     }
 }

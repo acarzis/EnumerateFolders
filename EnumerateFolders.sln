@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnumerateService", "Enumera
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnumerateApp", "EnumerateApp\EnumerateApp.csproj", "{C6677645-173D-4E37-96DA-2F4C899B3EDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnumerateGUI", "EnumerateGUI\EnumerateGUI.csproj", "{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{C6677645-173D-4E37-96DA-2F4C899B3EDB}.Release|x64.Build.0 = Release|Any CPU
 		{C6677645-173D-4E37-96DA-2F4C899B3EDB}.Release|x86.ActiveCfg = Release|Any CPU
 		{C6677645-173D-4E37-96DA-2F4C899B3EDB}.Release|x86.Build.0 = Release|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Debug|x64.Build.0 = Debug|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Debug|x86.Build.0 = Debug|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Release|x64.ActiveCfg = Release|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Release|x64.Build.0 = Release|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Release|x86.ActiveCfg = Release|Any CPU
+		{37B1C87E-D8DB-4A42-AE32-F3A744FEB14F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

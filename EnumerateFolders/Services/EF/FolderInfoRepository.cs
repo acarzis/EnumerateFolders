@@ -330,6 +330,20 @@ namespace EnumerateFolders.Services
             }
         }
 
+
+        public IEnumerable<File> GetAllFiles()
+        {
+            try
+            {
+                _context = new SqlSrvCtx();
+                return _context.Files.Include(c => c.Category).Include(c => c.Folder).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public bool GetDriveList(out IEnumerable<Drive> drives)
         {
             drives = null;
@@ -457,8 +471,6 @@ namespace EnumerateFolders.Services
             {
                 _context = new SqlSrvCtx();
                 return _context.ToScanQueue.OrderBy(s => s.Id).OrderByDescending(s => s.Priority).FirstOrDefault();
-                // return _context.ToScanQueue.OrderByDescending(s => s.Priority).FirstOrDefault();
-
             }
             catch (Exception e)
             {
