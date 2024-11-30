@@ -7,13 +7,24 @@
         mc:Ignorable="d"
         Title="EnumerateGUI" Height="450" Width="800">
 
-    <Grid Name="maingrid">       
+    <Grid Name="maingrid">
+
         <Grid.RowDefinitions>
             <RowDefinition Height = "20" MaxHeight="20"/>
             <RowDefinition Height = "20" MaxHeight="20"/>
             <RowDefinition Height = "*"/>
         </Grid.RowDefinitions>
 
+        <!--<Menu Name="menu1" Height="22" Width="200" Grid.Row = "0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Aqua" >
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" />
+                <MenuItem Header="_Open" />
+                <MenuItem Header="_Save" />
+                <Separator />
+                <MenuItem Header="_Exit" />
+            </MenuItem>
+        </Menu>-->       
+        
         <Grid x:Name="topRow" Grid.Row = "1" Grid.ColumnSpan="2" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "50" />

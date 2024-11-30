@@ -73,9 +73,9 @@ namespace EnumerateGUI
 
                 // search the folders
                 lastSearchResultFolderList = new List<Folder>();
-                repo.GetAllFolders(out lastSearchResultFolderList);
+                repo.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
 
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
+                // lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
                 lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
                 lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
 

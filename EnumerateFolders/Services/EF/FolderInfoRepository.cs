@@ -212,14 +212,30 @@ namespace EnumerateFolders.Services
             return true;
         }
 
-        public bool GetAllFolders(out IEnumerable<Folder> folders)
+        public bool GetAllFolders(out IEnumerable<Folder> folders, string namesearchpattern = "", string pathsearchpattern = "")
         {
             folders = null;
 
             try
             {
                 _context = new SqlSrvCtx();
-                folders = _context.Folders.Include(c => c.Category).ToList();
+
+                if ((!String.IsNullOrEmpty(namesearchpattern)) && (!String.IsNullOrEmpty(pathsearchpattern)))
+                {
+                    folders = _context.Folders.Where(x => x.Name.ToLower().Contains(namesearchpattern.ToLower()) || x.Path.ToLower().Contains(pathsearchpattern.ToLower())).Include(c => c.Category).ToList();
+                }
+                else if (!String.IsNullOrEmpty(namesearchpattern))
+                {
+                    folders = _context.Folders.Where(x => x.Name.ToLower().Contains(namesearchpattern.ToLower())).Include(c => c.Category).ToList();
+                }
+                else if (!String.IsNullOrEmpty(pathsearchpattern))
+                {
+                    folders = _context.Folders.Where(x => x.Path.ToLower().Contains(pathsearchpattern.ToLower())).Include(c => c.Category).ToList();
+                }
+                else
+                {
+                    folders = _context.Folders.Include(c => c.Category).ToList();
+                }
             }
             catch (Exception)
             {
@@ -396,29 +412,31 @@ namespace EnumerateFolders.Services
 
             try
             {
-                _context = new SqlSrvCtx();
-                bool match = false;
-                if (fileExtension.StartsWith("."))
-                    fileExtension = fileExtension.Substring(1);
-
-                IEnumerable<Category> categories = GetCategories();
-                foreach (Category category in categories)
+                if (fileExtension.Length > 0)
                 {
-                    string[] words = category.Extensions.Split(',');
-                    foreach (string word in words)
+                    _context = new SqlSrvCtx();
+                    bool match = false;
+                    if (fileExtension.StartsWith("."))
+                        fileExtension = fileExtension.Substring(1);
+
+                    IEnumerable<Category> categories = GetCategories();
+                    foreach (Category category in categories)
                     {
-                        if (fileExtension == word)
+                        string[] words = category.Extensions.Split(',');
+                        foreach (string word in words)
                         {
-                            match = true;
-                            cat = category;
-                            break;
+                            if (fileExtension == word)
+                            {
+                                match = true;
+                                cat = category;
+                                break;
+                            }
                         }
+
+                        if (match)
+                            break;
                     }
-
-                    if (match)
-                        break;
                 }
-
             }
             catch (Exception)
             {
