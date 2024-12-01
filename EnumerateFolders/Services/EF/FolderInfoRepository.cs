@@ -483,6 +483,20 @@ namespace EnumerateFolders.Services
             }
         }
 
+        public bool PathExistsinScanQueue(string fullpath)
+        {
+            var qry = _context.ToScanQueue.Where(c => c.FullPathHash == Hash.getHashSha256(fullpath)).FirstOrDefault();
+            if (qry != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
         public ToScanQueue GetNextQueueItem()
         {
             try

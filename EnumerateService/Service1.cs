@@ -258,7 +258,8 @@ namespace EnumerateService
 
                             if (lastmodified >= lastchecked)
                             {
-                                repo.AddPathToScanQueue(f, (int)ScanPriority.MED);
+                                if (!repo.PathExistsinScanQueue(f))
+                                    repo.AddPathToScanQueue(f, (int)ScanPriority.MED);
 #if DEBUG
                                 Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
 #endif
@@ -297,7 +298,8 @@ namespace EnumerateService
 
                         if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))          // TO DO: handle folder sizes
                         {
-                            repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
+                            if (!repo.PathExistsinScanQueue(UNCPath(location)))
+                                repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
 
 #if DEBUG
                             Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
@@ -348,7 +350,8 @@ namespace EnumerateService
 #if DEBUG
                         Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
 #endif
-                        repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
+                        if (!repo.PathExistsinScanQueue(d.LogicalDrive))
+                            repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
 
                     }
                 }

@@ -31,8 +31,9 @@ namespace EnumerateGUI
         {
             FolderInfoRepository repo = new FolderInfoRepository();
             IEnumerable<Category> categories = repo.GetCategories();
-            List<string> categoryComboboxItemList = new List<string>();    
+            List<string> categoryComboboxItemList = new List<string>();
 
+            categoryComboboxItemList.Add("All");
             foreach (Category category in categories) {
                 categoryComboboxItemList.Add(category.Name);
             }
@@ -42,74 +43,82 @@ namespace EnumerateGUI
 
         }
 
-
         private void categoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            /*
             ComboBox cmb = sender as ComboBox;
 
-            switch (categoryComboBox.SelectedItem.ToString())
+            if (cmb == categoryComboBox)
             {
-                case "1":
-                    break;
-                case "2":
-                    break;
-                case "3":
-                    break;
+                Search(searchTextBox.Text, e.AddedItems[0].ToString());
             }
-            */
         }
 
         private void searchTextBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                // do a search 
-                string textSearch = searchTextBox.Text;
-                string category = categoryComboBox.Text;
-
-                FolderInfoRepository repo = new FolderInfoRepository();
-                List<SearchResultRow> rows = new List<SearchResultRow>();
-
-                // search the folders
-                lastSearchResultFolderList = new List<Folder>();
-                repo.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
-
-                // lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
-
-                foreach (Folder f in lastSearchResultFolderList)
-                {
-                    SearchResultRow row= new SearchResultRow();
-                    row.Name = f.Name;
-                    row.Path = f.Path;
-                    row.CategoryName = f.Category.Name;
-                    row.FileSize = f.FolderSize;    
-                    rows.Add(row);
-                }
-
-                // search the files    
-                lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
-                lastSearchResultFileList = repo.GetAllFiles();
-
-                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
-                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
-                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name == category);
-
-                foreach (EnumerateFolders.Entities.File f in lastSearchResultFileList)
-                {
-                    SearchResultRow row = new SearchResultRow();
-                    row.Name = f.Name;
-                    row.Path = Path.Combine(f.Folder.Path, f.Folder.Name);
-                    row.CategoryName = f.Category.Name;
-                    row.FileSize = f.FileSize;
-                    rows.Add(row);
-                }
-
-                resultsDataGrid.RowBackground = Brushes.LightGreen;
-                resultsDataGrid.ItemsSource = rows;
+                Search(searchTextBox.Text, categoryComboBox.Text);
             }
+        }
+
+        private void Search(string textSearch, string category)
+        {
+            FolderInfoRepository repo = new FolderInfoRepository();
+            List<SearchResultRow> rows = new List<SearchResultRow>();
+
+            // search the folders
+            lastSearchResultFolderList = new List<Folder>();
+            repo.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
+
+            lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
+
+            if (category != "All")
+            {
+                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name != String.Empty);
+            }
+            else
+            {
+                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
+            }
+
+            foreach (Folder f in lastSearchResultFolderList)
+            {
+                SearchResultRow row = new SearchResultRow();
+                row.Name = f.Name;
+                row.Path = f.Path;
+                row.CategoryName = f.Category.Name;
+                row.FileSize = f.FolderSize;
+                rows.Add(row);
+            }
+
+            // search the files    
+            lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
+            lastSearchResultFileList = repo.GetAllFiles();
+
+            lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
+            lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
+
+            if (category != "All")
+            {
+                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name == category);
+            }
+            else
+            {
+                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name != String.Empty);
+            }
+
+            foreach (EnumerateFolders.Entities.File f in lastSearchResultFileList)
+            {
+                SearchResultRow row = new SearchResultRow();
+                row.Name = f.Name;
+                row.Path = Path.Combine(f.Folder.Path, f.Folder.Name);
+                row.CategoryName = f.Category.Name;
+                row.FileSize = f.FileSize;
+                rows.Add(row);
+            }
+
+            resultsDataGrid.RowBackground = Brushes.LightGreen;
+            resultsDataGrid.ItemsSource = rows;
         }
     }
 }

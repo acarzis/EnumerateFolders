@@ -56,5 +56,6 @@ namespace EnumerateFolders.Services
         void AddPathToScanQueue(string fullpath, int priority);
         ToScanQueue GetNextQueueItem();
         void RemoveQueueItem(long queueId);
+        bool PathExistsinScanQueue(string fullpath);
     }
 }
