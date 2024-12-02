@@ -19,6 +19,8 @@ namespace EnumerateGUI
         IEnumerable<Folder> lastSearchResultFolderList = new List<Folder>();
         IEnumerable<EnumerateFolders.Entities.File> lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
         DispatcherTimer timer = new DispatcherTimer();
+        long searchFileCount = 0;
+        long searchFolderCount = 0;
 
         public MainWindow()
         {
@@ -52,20 +54,21 @@ namespace EnumerateGUI
         {
             FolderInfoRepository repo = new FolderInfoRepository();
             List<SearchResultRow> rows = new List<SearchResultRow>();
+            searchFileCount = 0;
+            searchFolderCount = 0;
 
             // search the folders
             lastSearchResultFolderList = new List<Folder>();
             repo.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
 
-            lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
-
             if (category != "All")
             {
+                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
                 lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name != String.Empty);
             }
             else
             {
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
+                lastSearchResultFolderList = lastSearchResultFolderList.Select(x => x);
             }
 
             foreach (Folder f in lastSearchResultFolderList)
@@ -73,9 +76,13 @@ namespace EnumerateGUI
                 SearchResultRow row = new SearchResultRow();
                 row.Name = f.Name;
                 row.Path = f.Path;
-                row.CategoryName = f.Category.Name;
+                if (row.CategoryName != null)
+                {
+                    row.CategoryName = f.Category.Name;
+                }
                 row.FileSize = f.FolderSize;
                 rows.Add(row);
+                searchFolderCount++;
             }
 
             // search the files    
@@ -112,10 +119,13 @@ namespace EnumerateGUI
                 }
                 row.FileSize = f.FileSize;
                 rows.Add(row);
+                searchFileCount++;
             }
 
             resultsDataGrid.RowBackground = Brushes.LightGreen;
             resultsDataGrid.ItemsSource = rows;
+
+            statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount;
         }
 
         public void dispatcherTimer_Tick(object sender, EventArgs e)
