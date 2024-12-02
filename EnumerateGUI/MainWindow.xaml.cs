@@ -1,7 +1,6 @@
 ﻿using EnumerateFolders.Entities;
 using EnumerateFolders.Services;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 
 namespace EnumerateGUI
@@ -20,11 +20,20 @@ namespace EnumerateGUI
     {
         IEnumerable<Folder> lastSearchResultFolderList = new List<Folder>();
         IEnumerable<EnumerateFolders.Entities.File> lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
+        DispatcherTimer timer = new DispatcherTimer();
 
         public MainWindow()
         {
             InitializeComponent();
             InitGui();
+            InitTimers();
+        }
+
+        private void InitTimers()
+        {
+            timer.Tick += new EventHandler(dispatcherTimer_Tick);
+            timer.Interval = new TimeSpan(0, 0, 1);
+            timer.Start();
         }
 
         private void InitGui()
@@ -119,6 +128,14 @@ namespace EnumerateGUI
 
             resultsDataGrid.RowBackground = Brushes.LightGreen;
             resultsDataGrid.ItemsSource = rows;
+        }
+
+        public void dispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            DateTime time = DateTime.Now;
+
+            statusTime.Text = time.ToString();
+            timer.Start();
         }
     }
 }
