@@ -105,15 +105,11 @@ namespace EnumerateGUI
             lastSearchResultFileList = repo.GetAllFiles();
 
             lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
-            lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
 
             if (category != "All")
             {
+                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
                 lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name == category);
-            }
-            else
-            {
-                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name != String.Empty);
             }
 
             foreach (EnumerateFolders.Entities.File f in lastSearchResultFileList)
@@ -121,7 +117,10 @@ namespace EnumerateGUI
                 SearchResultRow row = new SearchResultRow();
                 row.Name = f.Name;
                 row.Path = Path.Combine(f.Folder.Path, f.Folder.Name);
-                row.CategoryName = f.Category.Name;
+                if (f.Category != null)
+                {
+                    row.CategoryName = f.Category.Name;
+                }
                 row.FileSize = f.FileSize;
                 rows.Add(row);
             }
