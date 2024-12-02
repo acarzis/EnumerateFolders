@@ -205,12 +205,16 @@ namespace EnumerateService
                             repo.RemoveQueueItem(nextitemtoprocess.Id);
                         }
 
+                        long filelistSize = 0;
                         foreach (string f in filelist)
                         {
                             FileInfo fileInfo = new FileInfo(f);
                             Category fileCategory = new Category();
                             string catstr = String.Empty;
 
+                            filelistSize += fileInfo.Length;
+
+                            // TO DO: Get this from a category cache
                             if (repo.GetFileCategory(fileInfo.Extension, out fileCategory))
                             {
                                 if (fileCategory != null)
@@ -224,17 +228,9 @@ namespace EnumerateService
                             Console.WriteLine("Adding file, directory: " + Path.GetDirectoryName(f) + ", filename: " + Path.GetFileName(f) + " to the repo");
 #endif
 
-                            // check if sub-folder matches a category 
-                            string catname = String.Empty;
-                            Tuple<string, string> match = categoryPaths.Find(t => fullpath.Contains(t.Item1));
-                            if (match != null)
-                            {
-                                catname = match.Item2;
-                            }
-                            repo.AddFolderDetails(fullpath, catname, 0, di.LastWriteTimeUtc, true); // update lastchecked date
                         }
 
-                        // add all the sub-folders for future processing
+                        // add all the sub-folders to the scan queue for future processing
                         List<string> folderlist = new List<string>();
 
                         try
@@ -245,6 +241,11 @@ namespace EnumerateService
                         {
                             Console.WriteLine("Access exception, directory: " + Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name));
                             repo.RemoveQueueItem(nextitemtoprocess.Id);
+                        }
+
+                        if (folderlist.Count == 0)
+                        {
+                            repo.AddFolderDetails(fullpath, String.Empty, filelistSize, new DateTime(), false);
                         }
 
                         foreach (string f in folderlist)
@@ -270,12 +271,16 @@ namespace EnumerateService
 
                     // get the category name if it exists.
                     string categoryname = String.Empty;
-                    Tuple<string, string> found = categoryPaths.Find(t => t.Item1.Contains(fullpath));
+                    string tmp = fullpath;
+                    if (!tmp.EndsWith("\\"))
+                        tmp += "\\";
+
+                    Tuple<string, string> found = categoryPaths.Find(t => tmp.Contains(t.Item1));
                     if (found != null)
                     {
                         categoryname = found.Item2;
                     }
-                    repo.AddFolderDetails(fullpath, categoryname, 0, di.LastWriteTimeUtc, true); // update lastchecked date
+                    repo.AddFolderDetails(fullpath, categoryname, 0, di.LastWriteTimeUtc, true); // true = update lastchecked date
 
 
                     // let's scan the sub-folders where a category is specified
