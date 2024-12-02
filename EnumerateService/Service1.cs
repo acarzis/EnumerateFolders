@@ -167,16 +167,27 @@ namespace EnumerateService
                     IEnumerable<Category> categories = repo.GetCategories();
                     categories = categories.Where(c => !string.IsNullOrEmpty(c.FolderLocations)).ToList();
 
-                    List<Tuple<string, string>> categoryPaths = new List<Tuple<string, string>>();   // fullpath, category name
+                    List<Tuple<string, string>> categoryPaths = new List<Tuple<string, string>>();          // fullpath, category name
+                    List<Tuple<string, string>> categoryExtensions = new List<Tuple<string, string>>();     // extension, category name
                     string[] locations = { };
+                    string[] extensions = { };
 
                     foreach (Category category in categories)
                     {
                         locations = category.FolderLocations.Split(',');
+                        extensions = category.Extensions.Split(',');
                         foreach (string location in locations)
                         {
                             Tuple<string, string> temp = new Tuple<string, string>(UNCPath(location), category.Name);
                             categoryPaths.Add(temp);
+                        }
+                        foreach (string extension in extensions)
+                        {
+                            if (extension != String.Empty)
+                            {
+                                Tuple<string, string> temp = new Tuple<string, string>(extension, category.Name);
+                                categoryExtensions.Add(temp);
+                            }
                         }
                     }
 
@@ -214,11 +225,10 @@ namespace EnumerateService
 
                             filelistSize += fileInfo.Length;
 
-                            // TO DO: Get this from a category cache
-                            if (repo.GetFileCategory(fileInfo.Extension, out fileCategory))
+                            Tuple<string, string> matched = categoryExtensions.Find(t => fileInfo.Extension.Contains(t.Item1));  // fileInfo.Extension has a leading '.'
+                            if (matched != null)
                             {
-                                if (fileCategory != null)
-                                    catstr = fileCategory.Name;
+                                catstr = matched.Item2;
                             }
 
                             // below will create a folder in the repo if required
