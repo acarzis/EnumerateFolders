@@ -165,7 +165,6 @@ namespace EnumerateService
                     ToScanQueue nextitemtoprocess = repo.GetNextQueueItem();
 
                     IEnumerable<Category> categories = repo.GetCategories();
-                    categories = categories.Where(c => !string.IsNullOrEmpty(c.FolderLocations)).ToList();
 
                     List<Tuple<string, string>> categoryPaths = new List<Tuple<string, string>>();          // fullpath, category name
                     List<Tuple<string, string>> categoryExtensions = new List<Tuple<string, string>>();     // extension, category name
@@ -174,13 +173,7 @@ namespace EnumerateService
 
                     foreach (Category category in categories)
                     {
-                        locations = category.FolderLocations.Split(',');
                         extensions = category.Extensions.Split(',');
-                        foreach (string location in locations)
-                        {
-                            Tuple<string, string> temp = new Tuple<string, string>(UNCPath(location), category.Name);
-                            categoryPaths.Add(temp);
-                        }
                         foreach (string extension in extensions)
                         {
                             if (extension != String.Empty)
@@ -188,6 +181,17 @@ namespace EnumerateService
                                 Tuple<string, string> temp = new Tuple<string, string>(extension, category.Name);
                                 categoryExtensions.Add(temp);
                             }
+                        }
+                    }
+
+                    categories = categories.Where(c => !string.IsNullOrEmpty(c.FolderLocations)).ToList();
+                    foreach (Category category in categories)
+                    {
+                        locations = category.FolderLocations.Split(',');
+                        foreach (string location in locations)
+                        {
+                            Tuple<string, string> temp = new Tuple<string, string>(UNCPath(location), category.Name);
+                            categoryPaths.Add(temp);
                         }
                     }
 
