@@ -14,3 +14,18 @@
                    I need to improve upon this. 
         
 2024/11/29 - added a simple WPF gui
+
+2024/12/02 - GUI improvements, application now computes folder size when all sub-folders have been scanned 
+
+
+// TO DO:
+
+//      the service should be permitted to work with the service account.
+//      the grid search refresh should be improved (use caching)
+//      add configuration screen
+//      replace data storage layer with perhaps sqlite.
+//      use seperate grid row colors to distinguish folders from files
+//      for file/foldersize, use abbrevations where required (kb, mb, gb, tb, etc ..) 
+
+
+

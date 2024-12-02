@@ -529,5 +529,28 @@ namespace EnumerateFolders.Services
                 throw e;
             }
         }
+
+        public long ComputeFolderSize(string folderpath)
+        {
+            long result = 0;
+
+            try
+            {
+                _context = new SqlSrvCtx();
+                IEnumerable<Folder> folders = _context.Folders.Where(x => x.Path.ToLower() == folderpath.ToLower());
+                foreach (Folder folder in folders)
+                {
+                    if (folder.FolderSize != 0)
+                        result += folder.FolderSize;
+                    else
+                        return 0;
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return result;
+        }
     }
 }

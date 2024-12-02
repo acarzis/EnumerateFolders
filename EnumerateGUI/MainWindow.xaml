@@ -17,21 +17,26 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height = "20" MaxHeight="20"/>
                 <RowDefinition Height = "20" MaxHeight="20"/>
+                <RowDefinition Height = "20" MaxHeight="20"/>
                 <RowDefinition Height = "*"/>
                 <RowDefinition Height = "25" MaxHeight="25"/>
             </Grid.RowDefinitions>
 
-            <!--<Menu Name="menu1" Height="22" Width="200" Grid.Row = "0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Aqua" >
-                <MenuItem Header="_File">
-                    <MenuItem Header="_New" />
-                    <MenuItem Header="_Open" />
-                    <MenuItem Header="_Save" />
+            <Menu Name="appmenu" Height="22" Width="200" Grid.Row = "0" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                <MenuItem Header="_Options" >
+                    <MenuItem Header="_Search">
+                    <MenuItem x:Name ="showEmptyCats" Header="Show Empty Categories" IsCheckable="True" IsChecked="True" Click="ShowEmptyCats_Click"></MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="_Config">
+                        <MenuItem Header="Categories"></MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="_About" />
                     <Separator />
                     <MenuItem Header="_Exit" />
                 </MenuItem>
-            </Menu>-->
+            </Menu>
 
-            <Grid x:Name="topRow" Grid.Row = "1" >
+            <Grid x:Name="topRow" Grid.Row = "2" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "50" />
                     <ColumnDefinition Width = "150" />
@@ -49,7 +54,7 @@
                    IsReadOnly="true"/>
             </Grid>
 
-            <Grid x:Name="dataGridRow" Grid.Row = "2"  >
+            <Grid x:Name="dataGridRow" Grid.Row = "3"  >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "20" />
                     <ColumnDefinition Width = "*" />
@@ -68,12 +73,12 @@
                 </DataGrid>
             </Grid>
 
-            <Grid x:Name="statusBarGridRow" Grid.Row = "3"  >
+            <Grid x:Name="statusBarGridRow" Grid.Row = "4"  >
                 <StatusBar>
                     <StatusBarItem DockPanel.Dock="Right" Width="150" >
-                    <TextBlock x:Name = "statusTime">
-                        <!--<Binding Source="{StaticResource getTime}" BindsDirectlyToSource="true"> </Binding>-->
-                    </TextBlock>
+                        <TextBlock x:Name = "statusTime">
+                            <!--<Binding Source="{StaticResource getTime}" BindsDirectlyToSource="true"> </Binding>-->
+                        </TextBlock>
                     </StatusBarItem>
                     <StatusBarItem>
                         <TextBlock x:Name = "statusText">Ready</TextBlock>

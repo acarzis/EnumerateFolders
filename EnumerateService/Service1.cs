@@ -103,7 +103,7 @@ namespace EnumerateService
 
                 Init();
 
-                timer.Interval = 5000; // in milliseconds, 5 secs
+                timer.Interval = 100; // in milliseconds, 1/10 sec
                 timer.Elapsed += new System.Timers.ElapsedEventHandler(this.OnTimer);
                 timer.AutoReset = false;
                 timer.Start();
@@ -153,7 +153,6 @@ namespace EnumerateService
 
             if ((running == false) && (shuttingDown == false))
             {
-                eventLog1.WriteEntry("Timer Operation Started");
                 running = true;
                 try
                 {
@@ -260,6 +259,14 @@ namespace EnumerateService
                         if (folderlist.Count == 0)
                         {
                             repo.AddFolderDetails(fullpath, String.Empty, filelistSize, new DateTime(), false);
+
+                            // check the sub-folders of the parent folder. we are checking for folder size presence for all sub-folders
+                            DirectoryInfo parent = Directory.GetParent(fullpath);
+                            long foldersize = repo.ComputeFolderSize(parent.FullName);
+                            if (foldersize > 0)
+                            {
+                                repo.AddFolderDetails(parent.FullName, String.Empty, foldersize, new DateTime(), false);
+                            }
                         }
 
                         foreach (string f in folderlist)
@@ -333,7 +340,6 @@ namespace EnumerateService
                 }
 
                 running = false;
-                eventLog1.WriteEntry("Timer Operation Stopped");
 
                 object waitTimeOut = new object();
                 lock (waitTimeOut)

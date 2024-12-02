@@ -57,5 +57,8 @@ namespace EnumerateFolders.Services
         ToScanQueue GetNextQueueItem();
         void RemoveQueueItem(long queueId);
         bool PathExistsinScanQueue(string fullpath);
+
+        // for determining folder size
+        long ComputeFolderSize(string folderpath);
     }
 }

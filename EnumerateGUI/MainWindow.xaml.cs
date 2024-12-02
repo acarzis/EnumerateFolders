@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -48,29 +46,9 @@ namespace EnumerateGUI
             }
             categoryComboBox.ItemsSource = categoryComboboxItemList;
             categoryComboBox.SelectedIndex = 0;
-
-
         }
 
-        private void categoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox cmb = sender as ComboBox;
-
-            if (cmb == categoryComboBox)
-            {
-                Search(searchTextBox.Text, e.AddedItems[0].ToString());
-            }
-        }
-
-        private void searchTextBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                Search(searchTextBox.Text, categoryComboBox.Text);
-            }
-        }
-
-        private void Search(string textSearch, string category)
+        private void Search(string textSearch, string category, bool includeEmptyCategory = true)
         {
             FolderInfoRepository repo = new FolderInfoRepository();
             List<SearchResultRow> rows = new List<SearchResultRow>();
@@ -104,13 +82,24 @@ namespace EnumerateGUI
             lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
             lastSearchResultFileList = repo.GetAllFiles();
 
-            lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
 
             if (category != "All")
             {
                 lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
                 lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name == category);
             }
+            else
+            {
+                if (includeEmptyCategory)
+                {
+                    lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
+                }
+                else
+                {
+                    lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
+                }
+            }
+
 
             foreach (EnumerateFolders.Entities.File f in lastSearchResultFileList)
             {
