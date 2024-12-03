@@ -70,7 +70,14 @@ namespace EnumerateGUI
             }
             else
             {
-                lastSearchResultFolderList = lastSearchResultFolderList.Select(x => x);
+                if (includeEmptyCategory)
+                {
+                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
+                }
+                else 
+                {
+                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
+                }
             }
 
             foreach (Folder f in lastSearchResultFolderList)
@@ -136,13 +143,13 @@ namespace EnumerateGUI
             searchFolderCount = 0;
             rows = new List<SearchResultRow>();
 
-
             IEnumerable<Folder> copySearchResultFolderList = new List<Folder>();
             IEnumerable<EnumerateFolders.Entities.File> copySearchResultFileList = new List<EnumerateFolders.Entities.File>();
 
             copySearchResultFolderList = lastSearchResultFolderList;
             copySearchResultFileList = lastSearchResultFileList;
 
+            // search the folders
             if (category != "All")
             {
                 copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category != null);
@@ -150,7 +157,14 @@ namespace EnumerateGUI
             }
             else
             {
-                copySearchResultFolderList = copySearchResultFolderList.Select(x => x);
+                if (includeEmptyCategory)
+                {
+                    copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
+                }
+                else
+                {
+                    copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
+                }
             }
 
             foreach (Folder f in copySearchResultFolderList)
@@ -167,6 +181,7 @@ namespace EnumerateGUI
                 searchFolderCount++;
             }
 
+            // search the files
             if (category != "All")
             {
                 copySearchResultFileList = copySearchResultFileList.Where(x => x.Category != null);

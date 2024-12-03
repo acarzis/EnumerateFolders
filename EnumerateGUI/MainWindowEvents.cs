@@ -15,7 +15,7 @@ namespace EnumerateGUI
 
             if (cmb == categoryComboBox)
             {
-                SearchFromCache(searchTextBox.Text, e.AddedItems[0].ToString());
+                SearchFromCache(searchTextBox.Text, e.AddedItems[0].ToString(), showEmptyCats.IsChecked ? true : false);
             }
         }
 
@@ -24,7 +24,7 @@ namespace EnumerateGUI
             if (e.Key == Key.Enter)
             {
                 Search(searchTextBox.Text, "All");
-                SearchFromCache(searchTextBox.Text, categoryComboBox.Text);
+                SearchFromCache(searchTextBox.Text, categoryComboBox.Text, showEmptyCats.IsChecked ? true: false);
             }
         }
 
