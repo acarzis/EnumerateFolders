@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Threading;
 
 
@@ -90,6 +89,7 @@ namespace EnumerateGUI
                     row.CategoryName = f.Category.Name;
                 }
                 row.FileSize = f.FolderSize;
+                row.IsDirectory = true;
                 rows.Add(row);
                 searchFolderCount++;
             }
@@ -125,12 +125,12 @@ namespace EnumerateGUI
                     row.CategoryName = f.Category.Name;
                 }
                 row.FileSize = f.FileSize;
+                row.IsDirectory = false;
                 rows.Add(row);
                 searchFileCount++;
             }
-
-            resultsDataGrid.RowBackground = Brushes.LightGreen;
             resultsDataGrid.ItemsSource = rows;
+            resultsDataGrid.Columns[resultsDataGrid.Columns.Count - 1].Visibility = Visibility.Hidden;
 
             searchQueueCount = repo.GetQueueSize();
             statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount + "  To Be Processed: " + searchQueueCount;
@@ -177,6 +177,7 @@ namespace EnumerateGUI
                     row.CategoryName = f.Category.Name;
                 }
                 row.FileSize = f.FolderSize;
+                row.IsDirectory = true;
                 rows.Add(row);
                 searchFolderCount++;
             }
@@ -209,11 +210,10 @@ namespace EnumerateGUI
                     row.CategoryName = f.Category.Name;
                 }
                 row.FileSize = f.FileSize;
+                row.IsDirectory = false;
                 rows.Add(row);
                 searchFileCount++;
             }
-
-            resultsDataGrid.RowBackground = Brushes.LightGreen;
             resultsDataGrid.ItemsSource = rows;
 
             statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount + "  To Be Processed: " + searchQueueCount;

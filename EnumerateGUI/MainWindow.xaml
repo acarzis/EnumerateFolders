@@ -68,9 +68,34 @@
                 </Grid.RowDefinitions>
 
                 <DataGrid x:Name="resultsDataGrid" 
-                          AutoGenerateColumns="True" 
+                          AutoGenerateColumns="False" 
                           Grid.Row = "1" Grid.Column="1">
-                </DataGrid>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Path" Binding="{Binding Path}" />
+                    <DataGridTextColumn Header="CategoryName" Binding="{Binding CategoryName}" />
+                    <DataGridTextColumn Header="FileSize" Binding="{Binding FileSize}" />
+                    <DataGridTextColumn Header="IsDirectory" Binding="{Binding IsDirectory}" Visibility="Hidden" />
+                </DataGrid.Columns>
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="IsHitTestVisible" Value="False"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDirectory}" Value="false">
+                                <Setter Property="Background" Value="#ccf2ff">
+                                </Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsDirectory}" Value="true">
+                                <Setter Property="Background" Value="#c2f0c2">
+                                    </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
+            </DataGrid>
             </Grid>
 
             <Grid x:Name="statusBarGridRow" Grid.Row = "4"  >
