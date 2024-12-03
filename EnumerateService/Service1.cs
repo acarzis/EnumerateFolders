@@ -222,25 +222,32 @@ namespace EnumerateService
                         long filelistSize = 0;
                         foreach (string f in filelist)
                         {
-                            FileInfo fileInfo = new FileInfo(f);
-                            Category fileCategory = new Category();
-                            string catstr = String.Empty;
-
-                            filelistSize += fileInfo.Length;
-
-                            Tuple<string, string> matched = categoryExtensions.Find(t => fileInfo.Extension.Contains(t.Item1));  // fileInfo.Extension has a leading '.'
-                            if (matched != null)
+                            try
                             {
-                                catstr = matched.Item2;
-                            }
+                                FileInfo fileInfo = new FileInfo(f);
+                                Category fileCategory = new Category();
+                                string catstr = String.Empty;
 
-                            // below will create a folder in the repo if required
-                            repo.AddFile(Path.GetDirectoryName(f), Path.GetFileName(f), String.Empty, catstr, fileInfo.Length);
+                                filelistSize += fileInfo.Length;
+
+                                Tuple<string, string> matched = categoryExtensions.Find(t => fileInfo.Extension.Contains(t.Item1));  // fileInfo.Extension has a leading '.'
+                                if (matched != null)
+                                {
+                                    catstr = matched.Item2;
+                                }
+
+                                // below will create a folder in the repo if required
+                                repo.AddFile(Path.GetDirectoryName(f), Path.GetFileName(f), String.Empty, catstr, fileInfo.Length);
 
 #if DEBUG
-                            Console.WriteLine("Adding file, directory: " + Path.GetDirectoryName(f) + ", filename: " + Path.GetFileName(f) + " to the repo");
+                                Console.WriteLine("Adding file, directory: " + Path.GetDirectoryName(f) + ", filename: " + Path.GetFileName(f) + " to the repo");
 #endif
 
+                            }
+                            catch (Exception e)
+                            {
+                                eventLog1.WriteEntry("Exception while processing file " + f + " : " + e.ToString());
+                            }
                         }
 
                         // add all the sub-folders to the scan queue for future processing

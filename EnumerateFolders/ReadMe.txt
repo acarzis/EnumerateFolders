@@ -20,14 +20,13 @@ Please not that I created this solution quickly and there are items probably sho
 Items which are missing and must be added:
 (DONE)		1. Categories should be permitted to be assigned to a folderpath as well.
 (DONE)		2. Network/mapped drives are not currently supported - this is a serious limitation for those people using a NAS.  
-(PARTIAL)	3. Only files at the root level are currently associated with a category. There should be no folder depth limit.
+(DONE)		3. Only files at the root level are currently associated with a category. There should be no folder depth limit.
 			4. The service stop code needs improvement.
-			5. The 'GUI/front-end' to manage and view the data does not yet exist.
+(ONGOING)	5. The 'GUI/front-end' to manage and view the data does not yet exist.
 			6. There is no support for folders/files/categories which have been removed.
-			7. GUI - Add a search capability to find files of a specific category
+(DONE)		7. GUI - Add a search capability to find files of a specific category
+			8. Overall application performance needs improving
 	
-
-(I will get to these as soon as time permits)
 
 
 Possible additional improvements:
