@@ -66,7 +66,7 @@ namespace EnumerateGUI
             if (category != "All")
             {
                 lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name != String.Empty);
+                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
             }
             else
             {
@@ -78,7 +78,7 @@ namespace EnumerateGUI
                 SearchResultRow row = new SearchResultRow();
                 row.Name = f.Name;
                 row.Path = f.Path;
-                if (row.CategoryName != null)
+                if (f.Category != null)
                 {
                     row.CategoryName = f.Category.Name;
                 }
@@ -146,7 +146,7 @@ namespace EnumerateGUI
             if (category != "All")
             {
                 copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category != null);
-                copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category.Name != String.Empty);
+                copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category.Name == category);
             }
             else
             {
@@ -158,7 +158,7 @@ namespace EnumerateGUI
                 SearchResultRow row = new SearchResultRow();
                 row.Name = f.Name;
                 row.Path = f.Path;
-                if (row.CategoryName != null)
+                if (f.Category != null)
                 {
                     row.CategoryName = f.Category.Name;
                 }

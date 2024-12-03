@@ -23,7 +23,8 @@ namespace EnumerateGUI
         {
             if (e.Key == Key.Enter)
             {
-                Search(searchTextBox.Text, categoryComboBox.Text);
+                Search(searchTextBox.Text, "All");
+                SearchFromCache(searchTextBox.Text, categoryComboBox.Text);
             }
         }
 
@@ -35,7 +36,6 @@ namespace EnumerateGUI
             {
                 if (item.IsChecked)
                     SearchFromCache(searchTextBox.Text, categoryComboBox.Text, true);
-
                 else
                     SearchFromCache(searchTextBox.Text, categoryComboBox.Text, false);
             }
