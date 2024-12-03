@@ -510,6 +510,19 @@ namespace EnumerateFolders.Services
             }
         }
 
+        public long GetQueueSize()
+        {
+            try
+            {
+                _context = new SqlSrvCtx();
+                return _context.ToScanQueue.Count();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
         public void RemoveQueueItem(long queueId)
         {
             try
@@ -544,6 +557,14 @@ namespace EnumerateFolders.Services
                         result += folder.FolderSize;
                     else
                         return 0;
+                }
+
+                // get the size of all the files
+                string debughash = Hash.getHashSha256(folderpath);
+                IEnumerable<File> files = _context.Files.Where(x => x.FolderHash == Hash.getHashSha256(folderpath)).Include(c => c.Category).Include(c => c.Folder).ToList();
+                foreach (File file in files)
+                {
+                    result += file.FileSize;
                 }
             }
             catch (Exception e)

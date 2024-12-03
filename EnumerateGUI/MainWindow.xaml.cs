@@ -19,8 +19,10 @@ namespace EnumerateGUI
         IEnumerable<Folder> lastSearchResultFolderList = new List<Folder>();
         IEnumerable<EnumerateFolders.Entities.File> lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
         DispatcherTimer timer = new DispatcherTimer();
+        List<SearchResultRow> rows = new List<SearchResultRow>();
         long searchFileCount = 0;
         long searchFolderCount = 0;
+        long searchQueueCount = 0;
 
         public MainWindow()
         {
@@ -53,7 +55,7 @@ namespace EnumerateGUI
         private void Search(string textSearch, string category, bool includeEmptyCategory = true)
         {
             FolderInfoRepository repo = new FolderInfoRepository();
-            List<SearchResultRow> rows = new List<SearchResultRow>();
+            rows = new List<SearchResultRow>();
             searchFileCount = 0;
             searchFolderCount = 0;
 
@@ -89,7 +91,6 @@ namespace EnumerateGUI
             lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
             lastSearchResultFileList = repo.GetAllFiles();
 
-
             if (category != "All")
             {
                 lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
@@ -106,7 +107,6 @@ namespace EnumerateGUI
                     lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
                 }
             }
-
 
             foreach (EnumerateFolders.Entities.File f in lastSearchResultFileList)
             {
@@ -125,8 +125,85 @@ namespace EnumerateGUI
             resultsDataGrid.RowBackground = Brushes.LightGreen;
             resultsDataGrid.ItemsSource = rows;
 
-            statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount;
+            searchQueueCount = repo.GetQueueSize();
+            statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount + "  To Be Processed: " + searchQueueCount;
         }
+
+
+        private void SearchFromCache(string textSearch, string category, bool includeEmptyCategory = true)
+        {
+            searchFileCount = 0;
+            searchFolderCount = 0;
+            rows = new List<SearchResultRow>();
+
+
+            IEnumerable<Folder> copySearchResultFolderList = new List<Folder>();
+            IEnumerable<EnumerateFolders.Entities.File> copySearchResultFileList = new List<EnumerateFolders.Entities.File>();
+
+            copySearchResultFolderList = lastSearchResultFolderList;
+            copySearchResultFileList = lastSearchResultFileList;
+
+            if (category != "All")
+            {
+                copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category != null);
+                copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category.Name != String.Empty);
+            }
+            else
+            {
+                copySearchResultFolderList = copySearchResultFolderList.Select(x => x);
+            }
+
+            foreach (Folder f in copySearchResultFolderList)
+            {
+                SearchResultRow row = new SearchResultRow();
+                row.Name = f.Name;
+                row.Path = f.Path;
+                if (row.CategoryName != null)
+                {
+                    row.CategoryName = f.Category.Name;
+                }
+                row.FileSize = f.FolderSize;
+                rows.Add(row);
+                searchFolderCount++;
+            }
+
+            if (category != "All")
+            {
+                copySearchResultFileList = copySearchResultFileList.Where(x => x.Category != null);
+                copySearchResultFileList = copySearchResultFileList.Where(x => x.Category.Name == category);
+            }
+            else
+            {
+                if (includeEmptyCategory)
+                {
+                    copySearchResultFileList = copySearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
+                }
+                else
+                {
+                    copySearchResultFileList = copySearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
+                }
+            }
+
+            foreach (EnumerateFolders.Entities.File f in copySearchResultFileList)
+            {
+                SearchResultRow row = new SearchResultRow();
+                row.Name = f.Name;
+                row.Path = Path.Combine(f.Folder.Path, f.Folder.Name);
+                if (f.Category != null)
+                {
+                    row.CategoryName = f.Category.Name;
+                }
+                row.FileSize = f.FileSize;
+                rows.Add(row);
+                searchFileCount++;
+            }
+
+            resultsDataGrid.RowBackground = Brushes.LightGreen;
+            resultsDataGrid.ItemsSource = rows;
+
+            statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount + "  To Be Processed: " + searchQueueCount;
+        }
+
 
         public void dispatcherTimer_Tick(object sender, EventArgs e)
         {

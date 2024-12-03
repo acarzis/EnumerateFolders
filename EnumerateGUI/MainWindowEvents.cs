@@ -1,5 +1,4 @@
-﻿using EnumerateFolders.Entities;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -16,7 +15,7 @@ namespace EnumerateGUI
 
             if (cmb == categoryComboBox)
             {
-                Search(searchTextBox.Text, e.AddedItems[0].ToString());
+                SearchFromCache(searchTextBox.Text, e.AddedItems[0].ToString());
             }
         }
 
@@ -35,9 +34,10 @@ namespace EnumerateGUI
             if (item == showEmptyCats)
             {
                 if (item.IsChecked)
-                    Search(searchTextBox.Text, categoryComboBox.Text, true);
+                    SearchFromCache(searchTextBox.Text, categoryComboBox.Text, true);
+
                 else
-                    Search(searchTextBox.Text, categoryComboBox.Text, false);
+                    SearchFromCache(searchTextBox.Text, categoryComboBox.Text, false);
             }
         }
     }

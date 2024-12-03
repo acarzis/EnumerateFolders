@@ -3,6 +3,7 @@ namespace EnumerateService
 {
     public class Globals
     {
+        public const int OnTimerIntervalMSecs = 100;
         public const int OnTimerWaitDelayMSecs = 10;
     }
 

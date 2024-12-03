@@ -55,6 +55,7 @@ namespace EnumerateFolders.Services
         // for support of adding a folder to the scan queue:
         void AddPathToScanQueue(string fullpath, int priority);
         ToScanQueue GetNextQueueItem();
+        long GetQueueSize();
         void RemoveQueueItem(long queueId);
         bool PathExistsinScanQueue(string fullpath);
 

@@ -103,7 +103,7 @@ namespace EnumerateService
 
                 Init();
 
-                timer.Interval = 100; // in milliseconds, 1/10 sec
+                timer.Interval = Globals.OnTimerIntervalMSecs;
                 timer.Elapsed += new System.Timers.ElapsedEventHandler(this.OnTimer);
                 timer.AutoReset = false;
                 timer.Start();
@@ -322,7 +322,7 @@ namespace EnumerateService
                             exists = true;
                         }
 
-                        if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))          // TO DO: handle folder sizes
+                        if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))
                         {
                             if (!repo.PathExistsinScanQueue(UNCPath(location)))
                                 repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
@@ -404,6 +404,5 @@ namespace EnumerateService
             }
             return path;
         }
-
     }
 }
