@@ -149,6 +149,7 @@ namespace EnumerateService
         {
             // get next queue item and start processing it.
 
+            bool addedtoQueue = false;
             oSignalEvent.Reset();
 
             if ((running == false) && (shuttingDown == false))
@@ -288,10 +289,13 @@ namespace EnumerateService
                             if (lastmodified >= lastchecked)
                             {
                                 if (!repo.PathExistsinScanQueue(f))
+                                {
+                                    addedtoQueue = true;
                                     repo.AddPathToScanQueue(f, (int)ScanPriority.MED);
 #if DEBUG
-                                Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
+                                    Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
 #endif
+                                }
                             }
                         }
                     }
@@ -332,13 +336,19 @@ namespace EnumerateService
                         if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))
                         {
                             if (!repo.PathExistsinScanQueue(UNCPath(location)))
+                            {
+                                addedtoQueue = true;
                                 repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
 
 #if DEBUG
-                            Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
+                                Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
 #endif
+                            }
                         }
                     }
+
+                    if (!addedtoQueue)
+                        Init();                
                 }
 
                 catch (Exception e)
@@ -379,12 +389,14 @@ namespace EnumerateService
 
                     if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
                     {
-#if DEBUG
-                        Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
-#endif
                         if (!repo.PathExistsinScanQueue(d.LogicalDrive))
+                        {
                             repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
 
+#if DEBUG
+                            Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
+#endif
+                        }
                     }
                 }
             }
