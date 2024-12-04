@@ -348,7 +348,12 @@ namespace EnumerateService
                     }
 
                     if (!addedtoQueue)
-                        Init();                
+                    {
+                        if (repo.GetQueueSize() == 0)
+                        {
+                            Init();
+                        }
+                    }
                 }
 
                 catch (Exception e)
