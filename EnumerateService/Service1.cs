@@ -208,7 +208,7 @@ namespace EnumerateService
                         exists = true;
                     }
 
-                    if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))
+                    if ((di.LastWriteTimeUtc >= lastmodified) || (!exists))
                     {
                         try
                         {
@@ -279,14 +279,18 @@ namespace EnumerateService
 
                         foreach (string f in folderlist)
                         {
+                            bool exsts = false;
+                            DirectoryInfo diInfo = new DirectoryInfo(f);
                             lastchecked = DateTime.UtcNow;
                             lastmodified = DateTime.UtcNow;
+
                             if (repo.FolderExists(f, out Folder tempfolder))
                             {
                                 repo.GetFolderDetails(f, out cat, out fldrsize, out lastchecked, out lastmodified);
+                                exsts = true;
                             }
 
-                            if (lastmodified >= lastchecked)
+                            if ((diInfo.LastWriteTimeUtc >= lastmodified) || (!exsts))
                             {
                                 if (!repo.PathExistsinScanQueue(f))
                                 {
@@ -297,6 +301,9 @@ namespace EnumerateService
 #endif
                                 }
                             }
+
+                            // update last checked date/time
+                            repo.AddFolderDetails(f, String.Empty, 0, diInfo.LastWriteTimeUtc, true);
                         }
                     }
                     repo.RemoveQueueItem(nextitemtoprocess.Id);
@@ -315,7 +322,7 @@ namespace EnumerateService
                     repo.AddFolderDetails(fullpath, categoryname, 0, di.LastWriteTimeUtc, true); // true = update lastchecked date
 
 
-                    // let's scan the sub-folders where a category is specified
+                    // let's scan the sub-folders where a category is specified (Categories..FolderLocations)
                     foreach (string location in locations)
                     {
                         di = new DirectoryInfo(location);
