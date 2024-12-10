@@ -2,6 +2,7 @@
 using EnumerateFolders.Services;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -15,6 +16,10 @@ namespace EnumerateGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        BackgroundWorker backgroundWork = new BackgroundWorker();
+        bool isStartup = true;
+        RepositoryCache repoCache;
+
         IEnumerable<Folder> lastSearchResultFolderList = new List<Folder>();
         IEnumerable<EnumerateFolders.Entities.File> lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
         DispatcherTimer timer = new DispatcherTimer();
@@ -28,6 +33,29 @@ namespace EnumerateGUI
             InitializeComponent();
             InitGui();
             InitTimers();
+
+            statusText.Text = "RETRIEVING DATA FROM THE DATABASE. PLEASE WAIT ...";
+            backgroundWork.DoWork += InitCache;
+            backgroundWork.RunWorkerCompleted += InitCacheDone;
+            backgroundWork.RunWorkerAsync();
+        }
+
+        private void InitCache(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                repoCache = new RepositoryCache();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private void InitCacheDone(object sender, RunWorkerCompletedEventArgs e)
+        {
+            isStartup = false;
+            statusText.Text = "READY";
+            Search(searchTextBox.Text, categoryComboBox.Text, showEmptyCats.IsChecked ? true : false);
         }
 
         private void InitTimers()
@@ -53,6 +81,9 @@ namespace EnumerateGUI
 
         private void Search(string textSearch, string category, bool includeEmptyCategory = true)
         {
+            if (isStartup)
+                return;
+
             FolderInfoRepository repo = new FolderInfoRepository();
             rows = new List<SearchResultRow>();
             searchFileCount = 0;
@@ -60,22 +91,23 @@ namespace EnumerateGUI
 
             // search the folders
             lastSearchResultFolderList = new List<Folder>();
-            repo.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
+            repoCache.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
 
             if (category != "All")
             {
                 lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
                 lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
+                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
             }
             else
             {
                 if (includeEmptyCategory)
                 {
-                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
+                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
                 }
                 else 
                 {
-                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
+                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => (x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower())) && (x.Category != null));
                 }
             }
 
@@ -96,12 +128,13 @@ namespace EnumerateGUI
 
             // search the files    
             lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
-            lastSearchResultFileList = repo.GetAllFiles();
+            lastSearchResultFileList = repoCache.GetAllFiles();
 
             if (category != "All")
             {
                 lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
                 lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name == category);
+                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
             }
             else
             {
@@ -132,93 +165,9 @@ namespace EnumerateGUI
             resultsDataGrid.ItemsSource = rows;
             resultsDataGrid.Columns[resultsDataGrid.Columns.Count - 1].Visibility = Visibility.Hidden;
 
-            searchQueueCount = repo.GetQueueSize();
+            searchQueueCount = repoCache.GetQueueSize();
             statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount + "  To Be Processed: " + searchQueueCount;
         }
-
-
-        private void SearchFromCache(string textSearch, string category, bool includeEmptyCategory = true)
-        {
-            searchFileCount = 0;
-            searchFolderCount = 0;
-            rows = new List<SearchResultRow>();
-
-            IEnumerable<Folder> copySearchResultFolderList = new List<Folder>();
-            IEnumerable<EnumerateFolders.Entities.File> copySearchResultFileList = new List<EnumerateFolders.Entities.File>();
-
-            copySearchResultFolderList = lastSearchResultFolderList;
-            copySearchResultFileList = lastSearchResultFileList;
-
-            // search the folders
-            if (category != "All")
-            {
-                copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category != null);
-                copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Category.Name == category);
-            }
-            else
-            {
-                if (includeEmptyCategory)
-                {
-                    copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
-                }
-                else
-                {
-                    copySearchResultFolderList = copySearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
-                }
-            }
-
-            foreach (Folder f in copySearchResultFolderList)
-            {
-                SearchResultRow row = new SearchResultRow();
-                row.Name = f.Name;
-                row.Path = f.Path;
-                if (f.Category != null)
-                {
-                    row.CategoryName = f.Category.Name;
-                }
-                row.FileSize = f.FolderSize;
-                row.IsDirectory = true;
-                rows.Add(row);
-                searchFolderCount++;
-            }
-
-            // search the files
-            if (category != "All")
-            {
-                copySearchResultFileList = copySearchResultFileList.Where(x => x.Category != null);
-                copySearchResultFileList = copySearchResultFileList.Where(x => x.Category.Name == category);
-            }
-            else
-            {
-                if (includeEmptyCategory)
-                {
-                    copySearchResultFileList = copySearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
-                }
-                else
-                {
-                    copySearchResultFileList = copySearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
-                }
-            }
-
-            foreach (EnumerateFolders.Entities.File f in copySearchResultFileList)
-            {
-                SearchResultRow row = new SearchResultRow();
-                row.Name = f.Name;
-                row.Path = Path.Combine(f.Folder.Path, f.Folder.Name);
-                if (f.Category != null)
-                {
-                    row.CategoryName = f.Category.Name;
-                }
-                row.FileSize = f.FileSize;
-                row.IsDirectory = false;
-                rows.Add(row);
-                searchFileCount++;
-            }
-            resultsDataGrid.ItemsSource = rows;
-
-            statusText.Text = "Folders: " + searchFolderCount + "  Files: " + searchFileCount + "  To Be Processed: " + searchQueueCount;
-        }
-
 
         public void dispatcherTimer_Tick(object sender, EventArgs e)
         {

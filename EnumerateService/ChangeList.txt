@@ -17,15 +17,14 @@
 
 2024/12/02 - GUI improvements, application now computes folder size when all sub-folders have been scanned 
 
+2024/12/09 - GUI now retrieves all data from repo during startup and uses it for subsequent operations.
+             Changes to search functionality: search now requires search text to be in folder name or path 
+
 
 // TO DO:
 
 //      the service should be permitted to work with the service account.
-//      the grid search refresh should be improved (use caching)
 //      add configuration screen
-//      replace data storage layer with perhaps sqlite.
-//      use seperate grid row colors to distinguish folders from files
+//      replace data storage layer with perhaps sqlite or LiteDB.
 //      for file/foldersize, use abbrevations where required (kb, mb, gb, tb, etc ..) 
-
-
-
+//      application needs to be improved in terms of operational speed (search and file scan).
