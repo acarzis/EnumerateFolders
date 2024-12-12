@@ -25,8 +25,11 @@
             <Menu Name="appmenu" Height="22" Width="200" Grid.Row = "0" HorizontalAlignment="Left" VerticalAlignment="Top" >
                 <MenuItem Header="_Options" >
                     <MenuItem Header="_Search">
-                    <MenuItem x:Name ="showEmptyCats" Header="Show Empty Categories" IsCheckable="True" IsChecked="True" Click="ShowEmptyCats_Click"></MenuItem>
-                    </MenuItem>
+                    <MenuItem x:Name ="showEmptyCats" Header="Show Empty Categories" IsCheckable="True" IsChecked="True" Click="SearchMenuItem_Select"></MenuItem>
+                    <MenuItem x:Name ="showFolders" Header="Show Folders" IsCheckable="True" IsChecked="True" Click="SearchMenuItem_Select"></MenuItem>
+                    <MenuItem x:Name ="showFiles" Header="Show Files" IsCheckable="True" IsChecked="True" Click="SearchMenuItem_Select"></MenuItem>
+                    <MenuItem x:Name ="refreshSearch" Header="Refresh Search Results" IsCheckable="False" Click="SearchMenuItem_Select"></MenuItem>
+                </MenuItem>
                     <MenuItem Header="_Config">
                         <MenuItem Header="Categories"></MenuItem>
                     </MenuItem>

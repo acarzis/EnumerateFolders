@@ -17,7 +17,7 @@ namespace EnumerateGUI
     public partial class MainWindow : Window
     {
         BackgroundWorker backgroundWork = new BackgroundWorker();
-        bool isStartup = true;
+        bool searchIsBusy = true;
         RepositoryCache repoCache;
 
         IEnumerable<Folder> lastSearchResultFolderList = new List<Folder>();
@@ -35,6 +35,7 @@ namespace EnumerateGUI
             InitTimers();
 
             statusText.Text = "RETRIEVING DATA FROM THE DATABASE. PLEASE WAIT ...";
+            refreshSearch.IsEnabled = false;
             backgroundWork.DoWork += InitCache;
             backgroundWork.RunWorkerCompleted += InitCacheDone;
             backgroundWork.RunWorkerAsync();
@@ -44,6 +45,7 @@ namespace EnumerateGUI
         {
             try
             {
+                searchIsBusy = true;
                 repoCache = new RepositoryCache();
             }
             catch (Exception)
@@ -53,9 +55,10 @@ namespace EnumerateGUI
 
         private void InitCacheDone(object sender, RunWorkerCompletedEventArgs e)
         {
-            isStartup = false;
+            searchIsBusy = false;
             statusText.Text = "READY";
             Search(searchTextBox.Text, categoryComboBox.Text, showEmptyCats.IsChecked ? true : false);
+            refreshSearch.IsEnabled = true;
         }
 
         private void InitTimers()
@@ -79,9 +82,9 @@ namespace EnumerateGUI
             categoryComboBox.SelectedIndex = 0;
         }
 
-        private void Search(string textSearch, string category, bool includeEmptyCategory = true)
+        private void Search(string textSearch, string category, bool includeEmptyCategory = true, bool includeFolders = true, bool includeFiles = true)
         {
-            if (isStartup)
+            if (searchIsBusy)
                 return;
 
             FolderInfoRepository repo = new FolderInfoRepository();
@@ -91,77 +94,87 @@ namespace EnumerateGUI
 
             // search the folders
             lastSearchResultFolderList = new List<Folder>();
-            repoCache.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
 
-            if (category != "All")
+            if (includeFolders)
             {
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
-                lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
-            }
-            else
-            {
-                if (includeEmptyCategory)
+                repoCache.GetAllFolders(out lastSearchResultFolderList, textSearch, textSearch);
+
+                if (category != "All")
                 {
+                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category != null);
+                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Category.Name == category);
                     lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
                 }
-                else 
+                else
                 {
-                    lastSearchResultFolderList = lastSearchResultFolderList.Where(x => (x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower())) && (x.Category != null));
+                    if (includeEmptyCategory)
+                    {
+                        lastSearchResultFolderList = lastSearchResultFolderList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower()));
+                    }
+                    else 
+                    {
+                        lastSearchResultFolderList = lastSearchResultFolderList.Where(x => (x.Name.ToLower().Contains(textSearch.ToLower()) || x.Path.ToLower().Contains(textSearch.ToLower())) && (x.Category != null));
+                    }
                 }
-            }
 
-            foreach (Folder f in lastSearchResultFolderList)
-            {
-                SearchResultRow row = new SearchResultRow();
-                row.Name = f.Name;
-                row.Path = f.Path;
-                if (f.Category != null)
+                foreach (Folder f in lastSearchResultFolderList)
                 {
-                    row.CategoryName = f.Category.Name;
+                    SearchResultRow row = new SearchResultRow();
+                    row.Name = f.Name;
+                    row.Path = f.Path;
+                    if (f.Category != null)
+                    {
+                        row.CategoryName = f.Category.Name;
+                    }
+                    row.FileSize = f.FolderSize;
+                    row.IsDirectory = true;
+                    rows.Add(row);
+                    searchFolderCount++;
                 }
-                row.FileSize = f.FolderSize;
-                row.IsDirectory = true;
-                rows.Add(row);
-                searchFolderCount++;
             }
 
             // search the files    
             lastSearchResultFileList = new List<EnumerateFolders.Entities.File>();
-            lastSearchResultFileList = repoCache.GetAllFiles();
 
-            if (category != "All")
+            if (includeFiles)
             {
-                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
-                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name == category);
-                lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
-            }
-            else
-            {
-                if (includeEmptyCategory)
+
+                lastSearchResultFileList = repoCache.GetAllFiles();
+
+                if (category != "All")
                 {
+                    lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category != null);
+                    lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Category.Name == category);
                     lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
                 }
                 else
                 {
-                    lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
+                    if (includeEmptyCategory)
+                    {
+                        lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()));
+                    }
+                    else
+                    {
+                        lastSearchResultFileList = lastSearchResultFileList.Where(x => x.Name.ToLower().Contains(textSearch.ToLower()) && (x.Category != null));
+                    }
+                }
+
+                foreach (EnumerateFolders.Entities.File f in lastSearchResultFileList)
+                {
+                    SearchResultRow row = new SearchResultRow();
+                    row.Name = f.Name;
+                    row.Path = Path.Combine(f.Folder.Path, f.Folder.Name);
+                    if (f.Category != null)
+                    {
+                        row.CategoryName = f.Category.Name;
+                    }
+                    row.FileSize = f.FileSize;
+                    row.IsDirectory = false;
+                    rows.Add(row);
+                    searchFileCount++;
                 }
             }
 
-            foreach (EnumerateFolders.Entities.File f in lastSearchResultFileList)
-            {
-                SearchResultRow row = new SearchResultRow();
-                row.Name = f.Name;
-                row.Path = Path.Combine(f.Folder.Path, f.Folder.Name);
-                if (f.Category != null)
-                {
-                    row.CategoryName = f.Category.Name;
-                }
-                row.FileSize = f.FileSize;
-                row.IsDirectory = false;
-                rows.Add(row);
-                searchFileCount++;
-            }
             resultsDataGrid.ItemsSource = rows;
             resultsDataGrid.Columns[resultsDataGrid.Columns.Count - 1].Visibility = Visibility.Hidden;
 

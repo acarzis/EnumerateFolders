@@ -28,16 +28,21 @@ namespace EnumerateGUI
             }
         }
 
-        private void ShowEmptyCats_Click(object sender, RoutedEventArgs e)
+        private void SearchMenuItem_Select(object sender, RoutedEventArgs e)
         {
             MenuItem item = sender as MenuItem;
-
-            if (item == showEmptyCats)
+            if (item == refreshSearch)
             {
-                if (item.IsChecked)
-                    Search(searchTextBox.Text, categoryComboBox.Text, true);
-                else
-                    Search(searchTextBox.Text, categoryComboBox.Text, false);
+                if (!searchIsBusy)
+                {
+                    refreshSearch.IsEnabled = false;
+                    statusText.Text = "RETRIEVING DATA FROM THE DATABASE. PLEASE WAIT ...";
+                    backgroundWork.RunWorkerAsync();
+                }
+            }
+            else
+            {
+                Search(searchTextBox.Text, categoryComboBox.Text, showEmptyCats.IsChecked, showFolders.IsChecked, showFiles.IsChecked);
             }
         }
     }
