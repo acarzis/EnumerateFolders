@@ -31,7 +31,7 @@
                     <MenuItem x:Name ="refreshSearch" Header="Refresh Search Results" IsCheckable="False" Click="SearchMenuItem_Select"></MenuItem>
                 </MenuItem>
                     <MenuItem Header="_Config">
-                        <MenuItem Header="Categories"></MenuItem>
+                        <MenuItem x:Name = "categoriesConfig" Header="Categories" Click="CategoriesConfig_Select"></MenuItem>
                     </MenuItem>
                     <MenuItem Header="_About" />
                     <Separator />

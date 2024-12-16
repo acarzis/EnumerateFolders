@@ -1,0 +1,60 @@
+﻿<Window x:Class="EnumerateGUI.ConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EnumerateGUI"
+        mc:Ignorable="d"
+        Title="Configuration Window" Height="600" Width="800" MinWidth="800" MinHeight="600" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "0.05*" />
+            <RowDefinition Height= "0.9*" />
+            <RowDefinition Height = "0.02*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="topRow" Grid.Row = "0" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "0.33*" />
+                <ColumnDefinition Width = "0.33*" />
+                <ColumnDefinition Width = "0.33*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Categories" Grid.Column="0" Margin="25, 10, 0, 0" />
+            <TextBlock Text="Extensions" Grid.Column="1" Margin="16, 10, 0, 0" />
+            <TextBlock Text="Locations" Grid.Column="2"  Margin="16, 10, 0, 0" />
+        </Grid>
+
+        <Grid x:Name="middleRow" Grid.Row = "1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "0.33*" />
+                <ColumnDefinition Width = "0.33*" />
+                <ColumnDefinition Width = "0.33*" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox Grid.Column = "0" Name="lbCategories" SelectionChanged="CategoryChanged" SelectionMode="Single" Margin="20, 20, 10, 20">
+                <ListBox.ContextMenu>
+                    <ContextMenu x:Name="CategoriesContext"  StaysOpen="true">
+                        <MenuItem x:Name="CategoryAdd"  Header="Add" Click="Add_OnClick" />
+                        <MenuItem x:Name="CategoryDelete" Header="Delete" Click="Delete_OnClick" Visibility="Hidden" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+            <ListBox Grid.Column = "1" Name="lbExtensions" SelectionChanged="ExtensionsChanged" SelectionMode="Single" Margin="10, 20, 10, 20">
+                <ListBox.ContextMenu>
+                    <ContextMenu x:Name="ExtensionsContext"  StaysOpen="true">
+                        <MenuItem Header="Add" x:Name="ExtensionAdd" Click="Add_OnClick" />
+                        <MenuItem Header="Delete" x:Name="ExtensionDelete" Click="Delete_OnClick" Visibility="Hidden" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+            <ListBox Grid.Column = "2" Name="lbFolders" SelectionChanged="FoldersChanged" SelectionMode="Single" Margin="10, 20, 20, 20">
+                <ListBox.ContextMenu>
+                    <ContextMenu x:Name="FoldersContext"  StaysOpen="true">
+                        <MenuItem Header="Add" x:Name="FolderAdd" Click="Add_OnClick" />
+                        <MenuItem Header="Delete" x:Name="FolderDelete" Click="Delete_OnClick" Visibility="Hidden"/>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+        </Grid>
+    </Grid>
+</Window>

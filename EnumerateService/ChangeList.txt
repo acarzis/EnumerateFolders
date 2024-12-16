@@ -21,6 +21,7 @@
              Changes to search functionality: search now requires search text to be in folder name or path 
 
 2024/12/12 - GUI now allows filtering for folders or files. Added a search results refresh feature.
+2024/12/16 - GUI improvements, added simple configuration screen. Work is incomplete 
 
 
 // TO DO:

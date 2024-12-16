@@ -45,5 +45,13 @@ namespace EnumerateGUI
                 Search(searchTextBox.Text, categoryComboBox.Text, showEmptyCats.IsChecked, showFolders.IsChecked, showFiles.IsChecked);
             }
         }
+
+        private void CategoriesConfig_Select(object sender, RoutedEventArgs e)
+        {
+            ConfigWindow configWindow = new ConfigWindow();
+            configWindow.Owner = this;
+            configWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            configWindow.ShowDialog();
+        }
     }
 }

@@ -58,6 +58,27 @@ namespace EnumerateFolders.Services
             }
         }
 
+        public void UpdateCategory(Category category)
+        {
+            try
+            {
+                _context = new SqlSrvCtx();
+                Category cat = _context.Categories.FirstOrDefault(f => f.Name == category.Name);
+                if (cat != null)
+                {
+                    cat.Extensions = category.Extensions;
+                    cat.FolderLocations = category.FolderLocations;
+                    _context.Categories.Update(cat);
+                    _context.SaveChanges();
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public bool AddFolder(string folderpath, string category = null, long foldersize = 0)
         {
             try
