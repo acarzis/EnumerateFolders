@@ -16,7 +16,7 @@ namespace EnumerateFolders
             // let's add some categories
             Category cat = new Category();
             cat.Name = "Music";
-            cat.Extensions = "mp3,wav,flac,m4a,vob";
+            cat.Extensions = "mp3,wav,flac,m4a,vob,wma,aac";
             cat.FolderLocations = "Y:\\";
             repo.AddCategory(cat);
 
@@ -28,11 +28,13 @@ namespace EnumerateFolders
             cat = new Category();
             cat.Name = "Pictures";
             cat.Extensions = "jpeg,jpg,png,gif,tiff,bmp,webp,psd,raw";
+            cat.FolderLocations = "X:\\PICTURES";     
             repo.AddCategory(cat);
 
             cat = new Category();
             cat.Name = "Videos";
             cat.Extensions = "mp4,mov,avi,wmv,flv,f4v,mkv,webm,avchd,mpeg,mpg,ogv,m4v";
+            cat.FolderLocations = "W:\\";
             repo.AddCategory(cat);
 
             List<Category> categories = (List<Category>)repo.GetCategories();
