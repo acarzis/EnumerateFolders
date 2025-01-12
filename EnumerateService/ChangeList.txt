@@ -21,13 +21,14 @@
              Changes to search functionality: search now requires search text to be in folder name or path 
 
 2024/12/12 - GUI now allows filtering for folders or files. Added a search results refresh feature.
-2024/12/16 - GUI improvements, added simple configuration screen. Work is incomplete 
+2024/12/16 - GUI improvements, added simple configuration screen. Work is INCOMPLETE.
+2025/01/11 - Added support for SQLite
 
 
 // TO DO:
 
 //      the service should be permitted to work with the service account.
 //      add configuration screen
-//      replace data storage layer with perhaps sqlite or LiteDB.
+//      (DONE) replace data storage layer with perhaps sqlite or LiteDB.
 //      for file/foldersize, use abbrevations where required (kb, mb, gb, tb, etc ..) 
 //      application needs to be improved in terms of operational speed (search and file scan).
