@@ -6,6 +6,9 @@ I created this 'app' because I wanted a means to do the following:
 2. Have the size of each of my drive folders always available.
 3. Do the above using .Net EF Code First for the sake of learning and ease of development
 
+Note: This is unfinished work. A lot of the code is in place but improvements are needed here and there. 
+As well as major GUI improvements. 
+
 App history is available in the ChangeList.txt file. 
 
 Angelo Carzis  
