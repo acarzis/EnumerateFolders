@@ -47,7 +47,6 @@ We can do the same thing above in code:
 Database.Migrate();	- this will execute migrations
 
 
-
 Angelo Carzis
 November 2, 2024
 Montreal, Canada

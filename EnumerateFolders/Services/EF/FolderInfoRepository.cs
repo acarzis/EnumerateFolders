@@ -11,12 +11,50 @@ using File = EnumerateFolders.Entities.File;
 
 namespace EnumerateFolders.Services
 {
-    public class FolderInfoRepository : IFolderInfoRepository
+    public class FolderInfoRepository : IFolderInfoRepository, IDatabase
     {
         private SqlSrvCtx _context;
+        private string _serviceAssemblyPath = string.Empty;
 
-        public FolderInfoRepository()
+        // called from EnumerateService
+        public void SetAssemblyLocation(string servicepath)
         {
+            _serviceAssemblyPath = servicepath;
+
+            _context = new SqlSrvCtx();
+            _context.SetAssemblyLocation(_serviceAssemblyPath);
+        }
+
+        public string GetAssemblyLocation()
+        {
+            _context = new SqlSrvCtx();
+            return _context.GetServiceAssemblyLocation();
+        }
+
+
+        // IDatabase methods
+        public string GetConnectionString()
+        {
+            _context = new SqlSrvCtx();
+            return _context.GetConnectionString();
+        }
+
+        public void SetConnectionString(string fulldbfilepath)
+        {
+            _context = new SqlSrvCtx();
+            _context.SetConnectionString(fulldbfilepath);
+        }
+
+        public string GetDBFilePath()
+        {
+            _context = new SqlSrvCtx();
+            return _context.GetConnectionString();
+        }
+
+        public void SetDBFilePath(string path)
+        {
+            _context = new SqlSrvCtx();
+            _context.SetConnectionString(path);
         }
 
         public IEnumerable<Category> GetCategories()

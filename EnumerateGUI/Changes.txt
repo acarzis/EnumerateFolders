@@ -1,0 +1,13 @@
+﻿List of Changes:
+-------------------
+2025/1/16
+- added support of setting SQLite db location via config file
+  
+  Deficiency: EnumerateGUI will not execute if the service is not running.
+  Why so? Because the GUI examines the location of the service exacutable and extracts its config file to obtain the DB location.
+  It should be noted that config files (via ConfigurationManager) are associated with running assemblies, not dlls/libraries.
+  Reminder, there may be multiple instances of a dll (for example, EnumerateFolders.dll) active at any  given time.
+  Although the config screen can change the enumerate service's db location, the service must be restarted if that locaiton is to 
+  be made active.
+
+

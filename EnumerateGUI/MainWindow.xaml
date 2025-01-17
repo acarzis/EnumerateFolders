@@ -32,7 +32,8 @@
                 </MenuItem>
                     <MenuItem Header="_Config">
                         <MenuItem x:Name = "categoriesConfig" Header="Categories" Click="CategoriesConfig_Select"></MenuItem>
-                    </MenuItem>
+                        <MenuItem x:Name = "dbConfig" Header="DB" Click="DBConfig_Select"></MenuItem>
+                </MenuItem>
                     <MenuItem Header="_About" />
                     <Separator />
                     <MenuItem Header="_Exit" />

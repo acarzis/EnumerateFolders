@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Management;
+using System.ServiceProcess;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -70,16 +72,55 @@ namespace EnumerateGUI
 
         private void InitGui()
         {
-            FolderInfoRepository repo = new FolderInfoRepository();
-            IEnumerable<Category> categories = repo.GetCategories();
-            List<string> categoryComboboxItemList = new List<string>();
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Service");
+            ManagementObjectCollection collection = searcher.Get();
 
-            categoryComboboxItemList.Add("All");
-            foreach (Category category in categories) {
-                categoryComboboxItemList.Add(category.Name);
+            string servicepath = string.Empty;
+            foreach (ManagementObject obj in collection)
+            {
+                string name = obj["Name"] as string;
+
+                if (name == "EnumerateService")
+                {
+                    servicepath = obj["PathName"] as string;
+                }
             }
-            categoryComboBox.ItemsSource = categoryComboboxItemList;
-            categoryComboBox.SelectedIndex = 0;
+
+
+            ServiceController sc = new ServiceController("EnumerateService");
+            if (sc.Status == ServiceControllerStatus.Running)
+            {
+                FolderInfoRepository repo = new FolderInfoRepository();
+                repo.SetAssemblyLocation(servicepath);
+
+                /*
+                if (repo.GetAssemblyLocation() == string.Empty)
+                {
+                    // This condition should never be reached
+                    string message = "Enumerate Service is Not Running";
+                    MessageBox.Show(message, "Startup Error");
+
+                    throw new ArgumentException("Service Assembly Location Not Set");
+                }
+                */
+
+                IEnumerable<Category> categories = repo.GetCategories();
+                List<string> categoryComboboxItemList = new List<string>();
+                categoryComboboxItemList.Add("All");
+                foreach (Category category in categories)
+                {
+                    categoryComboboxItemList.Add(category.Name);
+                }
+                categoryComboBox.ItemsSource = categoryComboboxItemList;
+                categoryComboBox.SelectedIndex = 0;
+            }
+            else
+            {
+                string message = "Enumerate Service is Not Running";
+                MessageBox.Show(message, "Startup Error");
+
+                throw new ArgumentException("Service Assembly Location Not Set");
+            }
         }
 
         private void Search(string textSearch, string category, bool includeEmptyCategory = true, bool includeFolders = true, bool includeFiles = true)

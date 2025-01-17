@@ -88,6 +88,7 @@ public class InputBox
 
     private void windowdef()// window building - check only for window size
     {
+        Box.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         Box.Height = 300;// Box Height
         Box.Width = 500;// Box Width
         Box.Background = BoxBackgroundColor;
@@ -125,10 +126,6 @@ public class InputBox
 
     void Box_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        /*
-        if (!clicked)
-            e.Cancel = true;
-        */
     }
 
     private void input_MouseDown(object sender, MouseEventArgs e)
@@ -144,14 +141,6 @@ public class InputBox
     {
         clicked = true;
 
-        /*
-        if (input.Text == defaulttext || input.Text == "")
-            MessageBox.Show(errormessage, errortitle);
-        else
-        {
-            Box.Close();
-        }
-        */
         Box.Close();
         clicked = false;
     }

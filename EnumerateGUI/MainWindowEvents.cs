@@ -53,5 +53,13 @@ namespace EnumerateGUI
             configWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             configWindow.ShowDialog();
         }
+
+        private void DBConfig_Select(object sender, RoutedEventArgs e)
+        {
+            DBConfigWindow dbConfigWindow = new DBConfigWindow();
+            dbConfigWindow.Owner = this;
+            dbConfigWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            dbConfigWindow.ShowDialog();
+        }
     }
 }

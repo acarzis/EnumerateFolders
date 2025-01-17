@@ -23,6 +23,7 @@
 2024/12/12 - GUI now allows filtering for folders or files. Added a search results refresh feature.
 2024/12/16 - GUI improvements, added simple configuration screen. Work is INCOMPLETE.
 2025/01/11 - Added support for SQLite
+2025/01/16 - Added support for configuring location of SQLite db file via config file. 
 
 
 // TO DO:

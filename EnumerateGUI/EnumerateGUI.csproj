@@ -41,6 +41,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SharedResources\Debug\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -64,10 +66,18 @@
       <DependentUpon>ConfigWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ConfigWindowEvents.cs" />
+    <Compile Include="DBConfigWindow.xaml.cs">
+      <DependentUpon>DBConfigWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DBConfigWindowEvents.cs" />
     <Compile Include="InputBox.cs" />
     <Compile Include="MainWindowEvents.cs" />
     <Compile Include="SearchResults.cs" />
     <Page Include="ConfigWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DBConfigWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -115,6 +125,9 @@
       <Project>{b038d29e-e08d-46d9-b4ae-59d869425444}</Project>
       <Name>EnumerateFolders</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Changes.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

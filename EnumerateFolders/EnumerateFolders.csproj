@@ -313,6 +313,7 @@
     <Compile Include="Migrations\SqlSrvCtxModelSnapshot.cs" />
     <Compile Include="Services\Cache\RepositoryCache.cs" />
     <Compile Include="Services\IRepositoryCache.cs" />
+    <Compile Include="Utils\Generic.cs" />
     <Compile Include="Utils\MappedDriveResolver.cs" />
     <Compile Include="Utils\Hashing.cs" />
     <Compile Include="Database\IDatabase.cs" />
@@ -326,10 +327,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Changes.txt" />
     <Content Include="ReadMe.txt" />
     <Content Include="ReadMeDB.txt" />
   </ItemGroup>

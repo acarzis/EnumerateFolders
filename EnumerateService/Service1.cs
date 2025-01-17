@@ -4,7 +4,6 @@ using System.ServiceProcess;
 using System.Runtime.InteropServices;
 using System;
 using System.Threading;
-using EnumerateFolders.Database;
 using EnumerateFolders.Services;
 using System.Collections.Generic;
 using EnumerateFolders.Entities;
@@ -12,6 +11,7 @@ using System.Linq;
 using EnumerateFolders.Utils;
 using System.IO;
 using Microsoft.Win32;
+using System.Reflection;
 
 namespace EnumerateService
 {
@@ -48,7 +48,6 @@ namespace EnumerateService
         bool running = false;
         bool shuttingDown = false;
 
-        SqlSrvCtx ctx = null;
         FolderInfoRepository repo = null;
         ManualResetEvent oSignalEvent = new ManualResetEvent(false);
         System.Timers.Timer timer = new System.Timers.Timer();
@@ -390,6 +389,13 @@ namespace EnumerateService
             try
             {
                 repo = new FolderInfoRepository();
+                repo.SetAssemblyLocation(Assembly.GetExecutingAssembly().Location);
+
+
+                // TO DO:
+                // get db location
+                // check if DB exists, if not, create a dummy DB
+
 
                 IEnumerable<Drive> drives = new List<Drive>();
                 repo.GetDriveList(out drives);
