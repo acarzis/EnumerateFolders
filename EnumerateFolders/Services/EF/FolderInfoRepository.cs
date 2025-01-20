@@ -604,26 +604,45 @@ namespace EnumerateFolders.Services
 
         public long ComputeFolderSize(string folderpath)
         {
+            // the number of subfolders and root files in the repo must match what the file system detects in order for size to be computed.
+            // 
+
             long result = 0;
 
             try
             {
                 _context = new SqlSrvCtx();
                 IEnumerable<Folder> folders = _context.Folders.Where(x => x.Path.ToLower() == folderpath.ToLower());
-                foreach (Folder folder in folders)
-                {
-                    if (folder.FolderSize != 0)
-                        result += folder.FolderSize;
-                    else
-                        return 0;
-                }
 
-                // get the size of all the files
-                string debughash = Hash.getHashSha256(folderpath);
-                IEnumerable<File> files = _context.Files.Where(x => x.FolderHash == Hash.getHashSha256(folderpath)).Include(c => c.Category).Include(c => c.Folder).ToList();
-                foreach (File file in files)
+                List<string> folderList = new List<string>();
+                DriveOperations.EnumerateFolders(folderpath, "*.*", ref folderList);
+                if (folderList.Count == folders.Count())
                 {
-                    result += file.FileSize;
+                    foreach (Folder folder in folders)
+                    {
+                        if (folder.FolderSize != 0)
+                            result += folder.FolderSize;
+                        else
+                            return 0;
+                    }
+
+                    // get the size of all the files
+                    string debughash = Hash.getHashSha256(folderpath);
+                    IEnumerable<File> files = _context.Files.Where(x => x.FolderHash == Hash.getHashSha256(folderpath)).Include(c => c.Category).Include(c => c.Folder).ToList();
+
+                    List<string> fileList = new List<string>();
+                    DriveOperations.EnumerateFiles(folderpath, "*.*", ref fileList);
+                    if (fileList.Count == fileList.Count())
+                    {
+                        foreach (File file in files)
+                        {
+                            result += file.FileSize;
+                        }
+                    }
+                    else
+                    {
+                        result = 0;
+                    }
                 }
             }
             catch (Exception e)

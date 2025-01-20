@@ -138,7 +138,7 @@ namespace EnumerateService
         2. Get the drive list
         3. Scan each folder for files that match something in the Category List.
                 Add/Update a file in the repo with category,
-           Record/update the folder size, last checked date, last modified date  
+                Record/update the folder size, last checked date, last modified date  
         4. Do not scan any folder which has been assigned a Category.
         5. Do not scan any folder who's last checked date > last modified date.
         6. Root folder:  Always record/update the folder size, last checked date, last modified date
@@ -269,6 +269,8 @@ namespace EnumerateService
 
                             // check the sub-folders of the parent folder. we are checking for folder size presence for all sub-folders
                             DirectoryInfo parent = Directory.GetParent(fullpath);
+
+                            // Note: foldersize is determined from the repo entries, NOT from the filesystem.                             
                             long foldersize = repo.ComputeFolderSize(parent.FullName);
                             if (foldersize > 0)
                             {
