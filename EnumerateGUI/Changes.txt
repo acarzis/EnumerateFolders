@@ -10,4 +10,7 @@
   Although the config screen can change the enumerate service's db location, the service must be restarted if that locaiton is to 
   be made active.
 
+2025/01/21
+- bug fixes in the search feature
+- filesize now has KB/MB/GB/TB abbreviations
 

@@ -168,6 +168,7 @@ namespace EnumerateGUI
                         row.CategoryName = f.Category.Name;
                     }
                     row.FileSize = f.FolderSize;
+                    row.FileSizeStr = FileSize2String(f.FolderSize);
                     row.IsDirectory = true;
                     rows.Add(row);
                     searchFolderCount++;
@@ -210,6 +211,7 @@ namespace EnumerateGUI
                         row.CategoryName = f.Category.Name;
                     }
                     row.FileSize = f.FileSize;
+                    row.FileSizeStr = FileSize2String(f.FileSize);
                     row.IsDirectory = false;
                     rows.Add(row);
                     searchFileCount++;
@@ -229,6 +231,32 @@ namespace EnumerateGUI
 
             statusTime.Text = time.ToString();
             timer.Start();
+        }
+
+        private string FileSize2String(long filesize)
+        {
+            string result = String.Empty;
+            if (filesize > 1099511627776)
+            {
+                result = Convert.ToString(Math.Round(filesize/1099511627776.0, 3)) + " TB";
+            }
+            else if (filesize > 1073741824)
+            {
+                result = Convert.ToString(Math.Round(filesize / 1073741824.0, 3)) + " GB";
+            }
+            else if (filesize > 1048576)
+            {
+                result = Convert.ToString(Math.Round(filesize / 1048576.0, 3)) + " MB";
+            }
+            else if (filesize > 1024)
+            {
+                result = Convert.ToString(Math.Round(filesize / 1024.0, 3)) + " KB";
+            }
+            else
+            {
+                result = Convert.ToString(filesize);
+            }
+            return result;
         }
     }
 }

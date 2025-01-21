@@ -8,6 +8,7 @@ namespace EnumerateGUI
         public string Path { get; set; }
         public string CategoryName { get; set; }
         public long FileSize { get; set; }
+        public string FileSizeStr { get; set; }
         public bool IsDirectory { get; set; }
     }
 }

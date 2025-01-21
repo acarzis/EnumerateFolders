@@ -79,7 +79,8 @@
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
                     <DataGridTextColumn Header="Path" Binding="{Binding Path}" />
                     <DataGridTextColumn Header="CategoryName" Binding="{Binding CategoryName}" />
-                    <DataGridTextColumn Header="FileSize" Binding="{Binding FileSize}" />
+                    <DataGridTextColumn Header="FileSize" Binding="{Binding FileSize}" Visibility="Hidden" />
+                    <DataGridTextColumn Header="FileSize" Binding="{Binding FileSizeStr}" />
                     <DataGridTextColumn Header="IsDirectory" Binding="{Binding IsDirectory}" Visibility="Hidden" />
                 </DataGrid.Columns>
 
