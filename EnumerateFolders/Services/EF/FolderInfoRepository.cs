@@ -605,7 +605,6 @@ namespace EnumerateFolders.Services
         public long ComputeFolderSize(string folderpath)
         {
             // the number of subfolders and root files in the repo must match what the file system detects in order for size to be computed.
-            // 
 
             long result = 0;
 
@@ -632,7 +631,7 @@ namespace EnumerateFolders.Services
 
                     List<string> fileList = new List<string>();
                     DriveOperations.EnumerateFiles(folderpath, "*.*", ref fileList);
-                    if (fileList.Count == fileList.Count())
+                    if (fileList.Count == files.Count())
                     {
                         foreach (File file in files)
                         {
