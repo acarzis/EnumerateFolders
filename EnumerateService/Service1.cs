@@ -52,6 +52,13 @@ namespace EnumerateService
         ManualResetEvent oSignalEvent = new ManualResetEvent(false);
         System.Timers.Timer timer = new System.Timers.Timer();
 
+        DateTime lastCategoryRetrievalTime = DateTime.MinValue;
+        DateTime lastFolderLocationsRetrievalTime = DateTime.MinValue;
+        List<Tuple<string, string>> categoryPaths = new List<Tuple<string, string>>();          // fullpath, category name
+        List<Tuple<string, string>> categoryExtensions = new List<Tuple<string, string>>();     // extension, category name
+        string[] locations = { };
+
+
         public Service1()
         {
             InitializeComponent();
@@ -148,6 +155,8 @@ namespace EnumerateService
         {
             // get next queue item and start processing it.
 
+            eventLog1.WriteEntry("Starting Timer Event");
+            Console.WriteLine("Starting Timer Event");
             bool addedtoQueue = false;
             oSignalEvent.Reset();
 
@@ -163,34 +172,38 @@ namespace EnumerateService
                     repo = new FolderInfoRepository();
                     ToScanQueue nextitemtoprocess = repo.GetNextQueueItem();
 
-                    IEnumerable<Category> categories = repo.GetCategories();
-
-                    List<Tuple<string, string>> categoryPaths = new List<Tuple<string, string>>();          // fullpath, category name
-                    List<Tuple<string, string>> categoryExtensions = new List<Tuple<string, string>>();     // extension, category name
-                    string[] locations = { };
-                    string[] extensions = { };
-
-                    foreach (Category category in categories)
+                    if (DateTime.UtcNow.Subtract(lastCategoryRetrievalTime).TotalMinutes > 60.0)
                     {
-                        extensions = category.Extensions.Split(',');
-                        foreach (string extension in extensions)
+                        lastCategoryRetrievalTime = DateTime.UtcNow;
+                        string[] extensions = { };
+                        Array.Clear(locations, 0, locations.Length);
+                        categoryExtensions.Clear();
+                        categoryPaths.Clear();
+
+                        IEnumerable<Category> categories = repo.GetCategories();
+
+                        foreach (Category category in categories)
                         {
-                            if (extension != String.Empty)
+                            extensions = category.Extensions.Split(',');
+                            foreach (string extension in extensions)
                             {
-                                Tuple<string, string> temp = new Tuple<string, string>(extension, category.Name);
-                                categoryExtensions.Add(temp);
+                                if (extension != String.Empty)
+                                {
+                                    Tuple<string, string> temp = new Tuple<string, string>(extension, category.Name);
+                                    categoryExtensions.Add(temp);
+                                }
                             }
                         }
-                    }
 
-                    categories = categories.Where(c => !string.IsNullOrEmpty(c.FolderLocations)).ToList();
-                    foreach (Category category in categories)
-                    {
-                        locations = category.FolderLocations.Split(',');
-                        foreach (string location in locations)
+                        categories = categories.Where(c => !string.IsNullOrEmpty(c.FolderLocations)).ToList();
+                        foreach (Category category in categories)
                         {
-                            Tuple<string, string> temp = new Tuple<string, string>(UNCPath(location), category.Name);
-                            categoryPaths.Add(temp);
+                            locations = category.FolderLocations.Split(',');
+                            foreach (string location in locations)
+                            {
+                                Tuple<string, string> temp = new Tuple<string, string>(UNCPath(location), category.Name);
+                                categoryPaths.Add(temp);
+                            }
                         }
                     }
 
@@ -250,6 +263,11 @@ namespace EnumerateService
                             }
                         }
 
+                        if (filelistSize == 0)
+                        {
+                            repo.AddFolder(fullpath);
+                        }
+
                         // add all the sub-folders to the scan queue for future processing
                         List<string> folderlist = new List<string>();
 
@@ -293,13 +311,17 @@ namespace EnumerateService
 
                             if ((diInfo.LastWriteTimeUtc >= lastmodified) || (!exsts))
                             {
-                                if (!repo.PathExistsinScanQueue(f))
+                                // temp code - until I figure out a proper fix/new design
+                                if (!repo.FolderExists(f, out Folder tf))
                                 {
-                                    addedtoQueue = true;
-                                    repo.AddPathToScanQueue(f, (int)ScanPriority.MED);
+                                    if (!repo.PathExistsinScanQueue(f))
+                                    {
+                                        addedtoQueue = true;
+                                        repo.AddPathToScanQueue(f, (int)ScanPriority.MED);
 #if DEBUG
-                                    Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
+                                        Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
 #endif
+                                    }
                                 }
                             }
 
@@ -319,38 +341,46 @@ namespace EnumerateService
                     if (found != null)
                     {
                         categoryname = found.Item2;
+                        repo.AddFolderDetails(fullpath, categoryname, 0, di.LastWriteTimeUtc, true); // true = update lastchecked date
                     }
-                    repo.AddFolderDetails(fullpath, categoryname, 0, di.LastWriteTimeUtc, true); // true = update lastchecked date
 
 
                     // let's scan the sub-folders where a category is specified (Categories..FolderLocations)
-                    foreach (string location in locations)
+                    if (DateTime.UtcNow.Subtract(lastFolderLocationsRetrievalTime).TotalMinutes > 360.0)
                     {
-                        di = new DirectoryInfo(location);
-                        lastchecked = DateTime.UtcNow;
-                        lastmodified = DateTime.UtcNow;
-                        exists = false;
-
-                        string path = UNCPath(location);
-                        if (path.EndsWith("\\"))
-                            path = path.Remove(path.Length - 1);
-
-                        if (repo.FolderExists(path, out Folder tempfolder))
+                        lastFolderLocationsRetrievalTime = DateTime.UtcNow;
+                        foreach (string location in locations)
                         {
-                            repo.GetFolderDetails(path, out cat, out fldrsize, out lastchecked, out lastmodified);
-                            exists = true;
-                        }
+                            di = new DirectoryInfo(location);
+                            lastchecked = DateTime.UtcNow;
+                            lastmodified = DateTime.UtcNow;
+                            exists = false;
 
-                        if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))
-                        {
-                            if (!repo.PathExistsinScanQueue(UNCPath(location)))
+                            string path = UNCPath(location);
+                            if (path.EndsWith("\\"))
+                                path = path.Remove(path.Length - 1);
+
+                            if (repo.FolderExists(path, out Folder tempfolder))
                             {
-                                addedtoQueue = true;
-                                repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
+                                repo.GetFolderDetails(path, out cat, out fldrsize, out lastchecked, out lastmodified);
+                                exists = true;
+                            }
+
+                            if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))
+                            {
+                                // temp code - until I figure out a proper fix/new design
+                                if (!repo.FolderExists(UNCPath(location), out Folder tf))
+                                {
+                                    if (!repo.PathExistsinScanQueue(UNCPath(location)))
+                                    {
+                                        addedtoQueue = true;
+                                        repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
 
 #if DEBUG
-                                Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
+                                        Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
 #endif
+                                    }
+                                }
                             }
                         }
                     }
@@ -381,6 +411,8 @@ namespace EnumerateService
             }
 
             oSignalEvent.Set();
+            eventLog1.WriteEntry("Ending Timer Event");
+            Console.WriteLine("Ending Timer Event");
         }
 
         private bool Init()

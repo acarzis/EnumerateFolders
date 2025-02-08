@@ -24,3 +24,12 @@ Files belong to (1) Category , (1) Folder
 
 Once we know what we want (above), we start working on what operations we need in our DB 'API'.
 This is what defines IFolderInfoRepository and its implementation class, FolderInfoRepository
+
+
+Required indicies:
+
+CREATE INDEX ToScanQueue_FullPathHash 
+ON ToScanQueue(FullPathHash);
+
+CREATE INDEX [ToScanQueue_ToScanQueue_Id_Priority] ON [ToScanQueue] ([Id] ASC,[Priority] DESC);
+
