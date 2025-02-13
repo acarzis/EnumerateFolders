@@ -135,7 +135,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Changes.txt" />
+    <Resource Include="ChangeList.txt" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

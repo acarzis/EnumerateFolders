@@ -1,0 +1,6 @@
+﻿2025/1/16 - added support of setting SQLite db location via config file
+
+
+To Do list:
+the db file location will default to the service's installed location if there is no entry or the entry is invalid.
+a dummy sqllite db file with the proper structure will be created at that time.

@@ -333,7 +333,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Changes.txt" />
+    <Content Include="ChangeList.txt" />
     <Content Include="ReadMe.txt" />
     <Content Include="ReadMeDB.txt" />
   </ItemGroup>

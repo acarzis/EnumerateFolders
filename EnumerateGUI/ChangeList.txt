@@ -1,7 +1,4 @@
-﻿List of Changes:
--------------------
-2025/1/16
-- added support of setting SQLite db location via config file
+﻿2025/1/16 - added support of setting SQLite db location via config file
   
   Deficiency: EnumerateGUI will not execute if the service is not running.
   Why so? Because the GUI examines the location of the service exacutable and extracts its config file to obtain the DB location.
@@ -14,3 +11,6 @@
 - bug fixes in the search feature
 - filesize now has KB/MB/GB/TB abbreviations
 
+
+To Do List:
+	- sorting on file size is incorrect. It does not consider kb/mb/gb suffixes.

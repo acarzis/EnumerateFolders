@@ -172,6 +172,8 @@ namespace EnumerateService
                     repo = new FolderInfoRepository();
                     ToScanQueue nextitemtoprocess = repo.GetNextQueueItem();
 
+                    eventLog1.WriteEntry("Processing : " + Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name));
+
                     if (DateTime.UtcNow.Subtract(lastCategoryRetrievalTime).TotalMinutes > 60.0)
                     {
                         lastCategoryRetrievalTime = DateTime.UtcNow;
@@ -288,12 +290,15 @@ namespace EnumerateService
                             // check the sub-folders of the parent folder. we are checking for folder size presence for all sub-folders
                             DirectoryInfo parent = Directory.GetParent(fullpath);
 
+                            eventLog1.WriteEntry("Computing folder size : " + parent.FullName);
+
                             // Note: foldersize is determined from the repo entries, NOT from the filesystem.                             
                             long foldersize = repo.ComputeFolderSize(parent.FullName);
                             if (foldersize > 0)
                             {
                                 repo.AddFolderDetails(parent.FullName, String.Empty, foldersize, new DateTime(), false);
                             }
+                            eventLog1.WriteEntry("Computed folder size : " + foldersize.ToString());
                         }
 
                         foreach (string f in folderlist)

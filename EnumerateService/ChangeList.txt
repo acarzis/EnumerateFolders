@@ -26,10 +26,13 @@
 2025/01/16 - Added support for configuring location of SQLite db file via config file. 
 
 
-// TO DO:
+TO DO List:
+      - (DONE) replace data storage layer with perhaps sqlite or LiteDB.
+      - (DONE) for file/foldersize, use abbrevations where required (kb, mb, gb, tb, etc ..) 
+      - the service should be permitted to work with the service account.
+      - add support of folder/drive exclusions
+      - improve configuration where required
 
-//      the service should be permitted to work with the service account.
-//      add configuration screen
-//      (DONE) replace data storage layer with perhaps sqlite or LiteDB.
-//      for file/foldersize, use abbrevations where required (kb, mb, gb, tb, etc ..) 
-//      application needs to be improved in terms of operational speed (search and file scan).
+      MAJOR: 
+      - application needs to be improved in terms of operational speed (search and file scan).
+        the application is far too slow as is. a re-design may be required
