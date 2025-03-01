@@ -11,6 +11,7 @@ As well as major GUI improvements.
 
 App history is available in the ChangeList.txt file. 
 
-Angelo Carzis  
 November 3, 2024  
-Montreal, QC  
+
+Update:
+I am re-writing this app in C++ using a different approach - all oeprations will be done against an in memory database which is periodically written to a database in an efficient manner.
