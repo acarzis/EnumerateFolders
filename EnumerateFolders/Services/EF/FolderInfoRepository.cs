@@ -615,7 +615,7 @@ namespace EnumerateFolders.Services
 
                 List<string> folderList = new List<string>();
                 DriveOperations.EnumerateFolders(folderpath, "*.*", ref folderList);
-                if (folderList.Count == folders.Count())
+                if (folderList.Count == folders.Count()) // TO DO: think about this. this may not imply we have folder counts for all the folders 
                 {
                     foreach (Folder folder in folders)
                     {

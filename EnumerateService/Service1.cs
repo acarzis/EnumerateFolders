@@ -174,6 +174,7 @@ namespace EnumerateService
 
                     eventLog1.WriteEntry("Processing : " + Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name));
 
+                    // refresh category entries once per hour
                     if (DateTime.UtcNow.Subtract(lastCategoryRetrievalTime).TotalMinutes > 60.0)
                     {
                         lastCategoryRetrievalTime = DateTime.UtcNow;
@@ -218,6 +219,7 @@ namespace EnumerateService
                     bool exists = false;
                     if (repo.FolderExists(fullpath, out Folder tmpfolder))
                     {
+                        // TO DO: below details can be obtained from tmpfolder
                         repo.GetFolderDetails(fullpath, out cat, out fldrsize, out lastchecked, out lastmodified);
                         exists = true;
                     }
@@ -285,6 +287,8 @@ namespace EnumerateService
 
                         if (folderlist.Count == 0)
                         {
+                            // TO DO: This algorithm is incorrect. ComputeFolderSize needs to be made recursive
+
                             repo.AddFolderDetails(fullpath, String.Empty, filelistSize, new DateTime(), false);
 
                             // check the sub-folders of the parent folder. we are checking for folder size presence for all sub-folders

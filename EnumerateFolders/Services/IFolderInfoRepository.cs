@@ -35,24 +35,31 @@ namespace EnumerateFolders.Services
         // GetFolderSize(folder path)
 
 
+        // for Category processing
         IEnumerable<Category> GetCategories();
         bool AddCategory(Category category);
         bool CategoryExists(string category, out Category cat);
+        bool GetFileCategory(string fileExtension, out Category cat);
+
+        // for Folder processing
         bool AddFolder(string folderpath, string category, long foldersize);
         bool AddFolderDetails(string folderpath, string category, long foldersize, DateTime lastmodified, bool updateLastChecked);
         long GetFolderSize(string folderpath);
         string GetFolderCategory(string folderpath);
         bool GetFolderDetails(string folderpath, out Category cat, out long foldersize, out DateTime lastchecked, out DateTime lastmodified);
         bool GetAllFolders(out IEnumerable<Folder> folders, string namesearchpattern = "", string pathsearchpattern = "");
+        bool FolderExists(string folderpath, out Folder folder);
+
+        // for File processing
         bool AddFile(string folderpath, string filepath, string foldercategory = "", string filecategory = "", long filesize = 0);
         bool AddFileDetails(string filepath, string category, long filesize);
         IEnumerable<File> GetAllFiles();
+
+        // for Drive processing
         bool GetDriveList(out IEnumerable<Drive> drives);
         bool AddDrive(string drive, string name, int priority = 0);
-        bool GetFileCategory(string fileExtension, out Category cat);
-        bool FolderExists(string folderpath, out Folder folder);
 
-        // for support of adding a folder to the scan queue:
+        // for ScanQueue processing
         void AddPathToScanQueue(string fullpath, int priority);
         ToScanQueue GetNextQueueItem();
         long GetQueueSize();
