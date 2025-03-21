@@ -12,7 +12,7 @@ This is what we need in terms of database objects:
 
 3. A db table to store a folder (hash) with a (optional) category
 
-4. A db table to store a file (fullpath) hash with a categery
+4. A db table to store a file (fullpath) hash with a category
 
 
 Summary:
