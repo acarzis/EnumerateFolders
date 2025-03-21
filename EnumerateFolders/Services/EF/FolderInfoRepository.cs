@@ -44,6 +44,8 @@ namespace EnumerateFolders.Services
             _context = new SqlSrvCtx();
             _context.SetConnectionString(fulldbfilepath);
         }
+        // end IDatabase methods
+
 
         public string GetDBFilePath()
         {
@@ -153,6 +155,9 @@ namespace EnumerateFolders.Services
                 folder.FolderSize = foldersize;
                 _context.Folders.Add(folder);
                 _context.SaveChanges();
+
+                FolderManager fm = new FolderManager();
+                fm.AddChildFolder(folderpath, folder.Name);                   // TO DO : Verify
                 return true;
             }
             catch (Exception)
@@ -166,6 +171,9 @@ namespace EnumerateFolders.Services
             try
             {
                 _context = new SqlSrvCtx();
+
+                if (lastmodified == DateTime.MinValue)
+                    lastmodified = DateTime.UtcNow;
 
                 Category cat = new Category();
                 Folder folder = _context.Folders.Include(p => p.Category).FirstOrDefault(f => f.FullPathHash == Hash.getHashSha256(folderpath));
@@ -308,6 +316,7 @@ namespace EnumerateFolders.Services
             try
             {
                 _context = new SqlSrvCtx();
+                filepath = Path.Combine(folderpath, filepath);
 
                 Category cat = new Category();
                 File file = _context.Files.Include(p => p.Category).Include(o => o.Folder).FirstOrDefault(f => f.FullPathHash == Hash.getHashSha256(filepath));
@@ -360,6 +369,9 @@ namespace EnumerateFolders.Services
                 }
                 _context.Entry(file.Folder).State = EntityState.Unchanged;
                 _context.SaveChanges();
+
+                FolderManager fm = new FolderManager();
+                fm.AddFile(folderpath, filename);                   // TO DO : Verify
                 return true;
             }
             catch (Exception)
@@ -404,7 +416,6 @@ namespace EnumerateFolders.Services
                 return false;
             }
         }
-
 
         public IEnumerable<File> GetAllFiles()
         {
@@ -555,7 +566,6 @@ namespace EnumerateFolders.Services
             }
         }
 
-
         public ToScanQueue GetNextQueueItem()
         {
             try
@@ -649,6 +659,98 @@ namespace EnumerateFolders.Services
                 throw e;
             }
             return result;
+        }
+
+        public void GetFolderExclusions(out IEnumerable<FolderExclusions> folderexclusions)
+        {
+            try
+            {
+                _context = new SqlSrvCtx();
+                folderexclusions = _context.FolderExclusions.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public string GetFileName(string filepathhash)
+        {
+            string result = String.Empty;
+
+            try
+            {
+                _context = new SqlSrvCtx();
+                IEnumerable<File> file = _context.Files.Where(x => x.FullPathHash == filepathhash);
+                if (file != null)
+                {
+                    if (file.Count() > 1)
+                    {
+                        throw new FileNotFoundException("File not found - filepathhash: " + filepathhash);
+                    }
+                    foreach (File f in file)
+                    {
+                        result = f.Name;
+                    }
+                }
+                else
+                {
+                    throw new FileNotFoundException("File not found - filepathhash: " + filepathhash);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return result;
+        }
+
+        public string GetFullPath(string folderhash)
+        {
+            string result = string.Empty;
+
+            try
+            {
+                _context = new SqlSrvCtx();
+                IEnumerable<Folder> folder = _context.Folders.Where(x => x.FullPathHash == folderhash);
+                if (folder != null)
+                {
+                    if (folder.Count() > 1)
+                    {
+                        throw new FileNotFoundException("Folder not found - hash: " + folderhash);
+                    }
+                    foreach (Folder f in folder)
+                    {
+                        result = Path.Combine(f.Path, f.Name);
+                    }
+                }
+                else
+                {
+                    throw new FileNotFoundException("Folder not found - hash: " + folderhash);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return result;
+        }
+
+        public bool FileExists(string filepath, out File file)
+        {
+            _context = new SqlSrvCtx();
+
+            var qry = _context.Files.Where(c => c.FullPathHash == Hash.getHashSha256(filepath)).FirstOrDefault();
+            if (qry != null)
+            {
+                file = qry;
+                return true;
+            }
+            else
+            {
+                file = null;
+                return false;
+            }
         }
     }
 }

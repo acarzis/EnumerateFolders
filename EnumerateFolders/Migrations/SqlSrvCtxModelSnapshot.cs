@@ -3,7 +3,6 @@ using System;
 using EnumerateFolders.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EnumerateFolders.Migrations
@@ -15,9 +14,7 @@ namespace EnumerateFolders.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.14-servicing-32113")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "2.1.14-servicing-32113");
 
             modelBuilder.Entity("EnumerateFolders.Entities.Category", b =>
                 {
@@ -93,11 +90,20 @@ namespace EnumerateFolders.Migrations
                     b.ToTable("Folders");
                 });
 
+            modelBuilder.Entity("EnumerateFolders.Entities.FolderExclusions", b =>
+                {
+                    b.Property<string>("FullPath")
+                        .ValueGeneratedOnAdd();
+
+                    b.HasKey("FullPath");
+
+                    b.ToTable("FolderExclusions");
+                });
+
             modelBuilder.Entity("EnumerateFolders.Entities.ToScanQueue", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("FullPathHash");
 

@@ -3,23 +3,20 @@ using System;
 using EnumerateFolders.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EnumerateFolders.Migrations
 {
     [DbContext(typeof(SqlSrvCtx))]
-    [Migration("20241127161220_002")]
-    partial class _002
+    [Migration("20250320223451_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.14-servicing-32113")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "2.1.14-servicing-32113");
 
             modelBuilder.Entity("EnumerateFolders.Entities.Category", b =>
                 {
@@ -95,17 +92,28 @@ namespace EnumerateFolders.Migrations
                     b.ToTable("Folders");
                 });
 
+            modelBuilder.Entity("EnumerateFolders.Entities.FolderExclusions", b =>
+                {
+                    b.Property<string>("FullPath")
+                        .ValueGeneratedOnAdd();
+
+                    b.HasKey("FullPath");
+
+                    b.ToTable("FolderExclusions");
+                });
+
             modelBuilder.Entity("EnumerateFolders.Entities.ToScanQueue", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("FullPathHash");
 
                     b.Property<string>("Name");
 
                     b.Property<string>("Path");
+
+                    b.Property<int>("Priority");
 
                     b.HasKey("Id");
 

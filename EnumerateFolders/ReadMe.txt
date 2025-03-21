@@ -13,8 +13,11 @@ Sure, others have implemented similar applications. I decided to do it on my own
 and the fact that this is/was something relatively simple to do.
 
 
-Please not that I created this solution quickly and there are items probably should have done better. For instance:
-1. My preference is to not to use methods that return success/fail, rather, use exceptions. 
+Please note that I created this solution quickly and there are items probably should have done better 
+(i.e. there is quite a bit of sloppy work). 
+
+For instance:
+My preference is to not to use methods that return success/fail, rather, use exceptions. 
 
 
 Items which are missing and must be added:
@@ -26,12 +29,14 @@ Items which are missing and must be added:
 			6. There is no support for folders/files/categories which have been removed.
 (DONE)		7. GUI - Add a search capability to find files of a specific category
 			8. Overall application performance needs improving
+			9. More GUI features (exclusion lists)
+			10. Cleanup the documentation
 	
 
 
 Possible additional improvements:
 1. I'm not sure how good the approach used for folder/file searching is. Consider: cpu usage and effect to other tasks. 
-2. Add a DB caching layer (perhaps overkill)
+2. Add a DB caching layer (but it needs to be justified)
 
 
 

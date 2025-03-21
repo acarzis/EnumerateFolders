@@ -19,7 +19,8 @@ namespace EnumerateFolders.Database
         public DbSet<Entities.File> Files { get; set; }
         public DbSet<Drive> Drives { get; set; }
         public DbSet<ToScanQueue> ToScanQueue { get; set; }
-        string connectionstring = string.Empty;  
+        public DbSet<FolderExclusions> FolderExclusions { get; set; }
+        string connectionstring = "DataSource=D:\\EF_SQLite.db";            // TO DO: Fix this properly
 
         public SqlSrvCtx()
         {
@@ -33,7 +34,7 @@ namespace EnumerateFolders.Database
             {
                 config = ConfigurationManager.OpenExeConfiguration(exeConfigPath);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // TO DO: handle error here
                 return;
@@ -85,12 +86,8 @@ namespace EnumerateFolders.Database
             Generic.AddOrUpdateAppSettings(exeConfigPath, "connectionstring", connectionstring);
         }
 
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (connectionstring == string.Empty)
-                return;
-
             SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_e_sqlite3());
 
             // optionsBuilder.UseSqlServer(connectionstring);

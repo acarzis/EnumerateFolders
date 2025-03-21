@@ -1,4 +1,5 @@
 ﻿2025/1/16 - added support of setting SQLite db location via config file
+2025/3/21 - added FolderManager class
 
 
 To Do list:

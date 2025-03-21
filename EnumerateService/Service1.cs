@@ -56,6 +56,7 @@ namespace EnumerateService
         DateTime lastFolderLocationsRetrievalTime = DateTime.MinValue;
         List<Tuple<string, string>> categoryPaths = new List<Tuple<string, string>>();          // fullpath, category name
         List<Tuple<string, string>> categoryExtensions = new List<Tuple<string, string>>();     // extension, category name
+        List<string> folderexclusions = new List<string>();
         string[] locations = { };
 
 
@@ -137,6 +138,67 @@ namespace EnumerateService
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
         }
 
+        private bool Init()
+        {
+            // method returns true on error
+            bool result = false;
+
+            try
+            {
+                repo = new FolderInfoRepository();
+                repo.SetAssemblyLocation(Assembly.GetExecutingAssembly().Location);
+
+
+                // TO DO:
+                // get db location
+                // check if DB exists, if not, create a dummy DB
+
+                IEnumerable<Drive> drives = new List<Drive>();
+                repo.GetDriveList(out drives);
+                drives = drives.OrderByDescending(s => s.ScanPriority);
+
+                foreach (Drive d in drives)
+                {
+                    d.LogicalDrive = UNCPath(d.LogicalDrive);
+
+                    if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
+                    {
+                        if (!repo.PathExistsinScanQueue(d.LogicalDrive))
+                        {
+                            repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
+
+#if DEBUG
+                            Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
+#endif
+                        }
+                    }
+                }
+
+                IEnumerable<FolderExclusions> temp = new List<FolderExclusions>();
+                repo.GetFolderExclusions(out temp);
+                if (temp != null)
+                {
+                    foreach (FolderExclusions f in temp)
+                    {
+                        folderexclusions.Add(f.FullPath);
+                    }
+                }
+
+                FolderManager fm = new FolderManager();
+                fm.PopulateFolderData();
+                fm.PopulateFileData();
+
+                // test code
+                long size1 = fm.ComputeFolderSize("G:\\My Drive");
+            }
+
+            catch (Exception)
+            {
+                result = true;
+            }
+            return result;
+        }
+
 
         /*            
         What do we want this service to do ?
@@ -216,6 +278,27 @@ namespace EnumerateService
                     DirectoryInfo di = new DirectoryInfo(fullpath);
                     List<string> filelist = new List<string>();
 
+                    bool skip = false;
+                    foreach (string f in folderexclusions)
+                    {
+                        if (fullpath.ToLower().StartsWith(f.ToLower()))
+                        {
+#if DEBUG
+                            Console.WriteLine("Folder exclusion, skipping: " + f);
+#endif
+
+                            skip = true;
+                            break;
+                        }
+                    }
+
+                    // check if this is a root folder
+                    if (di.Parent == null)
+                    {
+                        skip = false;
+                    }
+
+
                     bool exists = false;
                     if (repo.FolderExists(fullpath, out Folder tmpfolder))
                     {
@@ -224,7 +307,7 @@ namespace EnumerateService
                         exists = true;
                     }
 
-                    if ((di.LastWriteTimeUtc >= lastmodified) || (!exists))
+                    if ((di.LastWriteTimeUtc >= lastchecked) || (!exists) || (!skip))
                     {
                         try
                         {
@@ -267,7 +350,7 @@ namespace EnumerateService
                             }
                         }
 
-                        if (filelistSize == 0)
+                        if (filelistSize == 0)  // Correction needed: Should be filelist.size()
                         {
                             repo.AddFolder(fullpath);
                         }
@@ -287,22 +370,24 @@ namespace EnumerateService
 
                         if (folderlist.Count == 0)
                         {
-                            // TO DO: This algorithm is incorrect. ComputeFolderSize needs to be made recursive
-
-                            repo.AddFolderDetails(fullpath, String.Empty, filelistSize, new DateTime(), false);
+                            repo.AddFolderDetails(fullpath, String.Empty, filelistSize, DateTime.UtcNow, false);
 
                             // check the sub-folders of the parent folder. we are checking for folder size presence for all sub-folders
-                            DirectoryInfo parent = Directory.GetParent(fullpath);
+                            // string parent = Directory.GetParent(fullpath).FullName;
 
-                            eventLog1.WriteEntry("Computing folder size : " + parent.FullName);
+                            // Note: foldersize is determined from the repo entries, NOT from the filesystem.
+                            // FolderManager fm = new FolderManager();
+                            // long foldersize = repo.ComputeFolderSize(parent.FullName);
 
-                            // Note: foldersize is determined from the repo entries, NOT from the filesystem.                             
-                            long foldersize = repo.ComputeFolderSize(parent.FullName);
+                            // ** TO DO ** Below is not thoroughly tested
+                            /*
+                            long foldersize = fm.ComputeFolderSize(fullpath);
                             if (foldersize > 0)
                             {
-                                repo.AddFolderDetails(parent.FullName, String.Empty, foldersize, new DateTime(), false);
+                                repo.AddFolderDetails(parent, String.Empty, foldersize, DateTime.UtcNow, false);
                             }
-                            eventLog1.WriteEntry("Computed folder size : " + foldersize.ToString());
+                            eventLog1.WriteEntry("Folder: " + parent + ", computed folder size : " + foldersize.ToString());
+                            */
                         }
 
                         foreach (string f in folderlist)
@@ -318,7 +403,7 @@ namespace EnumerateService
                                 exsts = true;
                             }
 
-                            if ((diInfo.LastWriteTimeUtc >= lastmodified) || (!exsts))
+                            if ((diInfo.LastWriteTimeUtc >= lastchecked) || (!exsts))
                             {
                                 // temp code - until I figure out a proper fix/new design
                                 if (!repo.FolderExists(f, out Folder tf))
@@ -350,8 +435,8 @@ namespace EnumerateService
                     if (found != null)
                     {
                         categoryname = found.Item2;
-                        repo.AddFolderDetails(fullpath, categoryname, 0, di.LastWriteTimeUtc, true); // true = update lastchecked date
                     }
+                    repo.AddFolderDetails(fullpath, categoryname, 0, di.LastWriteTimeUtc, true); // true = update lastchecked date
 
 
                     // let's scan the sub-folders where a category is specified (Categories..FolderLocations)
@@ -422,51 +507,6 @@ namespace EnumerateService
             oSignalEvent.Set();
             eventLog1.WriteEntry("Ending Timer Event");
             Console.WriteLine("Ending Timer Event");
-        }
-
-        private bool Init()
-        {
-            // returns true on error
-            bool result = false;
-
-            try
-            {
-                repo = new FolderInfoRepository();
-                repo.SetAssemblyLocation(Assembly.GetExecutingAssembly().Location);
-
-
-                // TO DO:
-                // get db location
-                // check if DB exists, if not, create a dummy DB
-
-
-                IEnumerable<Drive> drives = new List<Drive>();
-                repo.GetDriveList(out drives);
-                drives = drives.OrderByDescending(s => s.ScanPriority);
-
-                foreach (Drive d in drives)
-                {
-                    d.LogicalDrive = UNCPath(d.LogicalDrive);
-
-                    if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
-                    {
-                        if (!repo.PathExistsinScanQueue(d.LogicalDrive))
-                        {
-                            repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
-
-#if DEBUG
-                            Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
-#endif
-                        }
-                    }
-                }
-            }
-
-            catch (Exception e)
-            {
-                result = true;
-            }
-            return result;
         }
 
         // as per :  https://stackoverflow.com/questions/2067075/how-do-i-determine-a-mapped-drives-actual-path

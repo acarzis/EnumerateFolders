@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace EnumerateFolders.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -31,6 +31,33 @@ namespace EnumerateFolders.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Drives", x => x.LogicalDrive);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FolderExclusions",
+                columns: table => new
+                {
+                    FullPath = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FolderExclusions", x => x.FullPath);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ToScanQueue",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FullPathHash = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    Path = table.Column<string>(nullable: true),
+                    Priority = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToScanQueue", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -106,6 +133,12 @@ namespace EnumerateFolders.Migrations
 
             migrationBuilder.DropTable(
                 name: "Files");
+
+            migrationBuilder.DropTable(
+                name: "FolderExclusions");
+
+            migrationBuilder.DropTable(
+                name: "ToScanQueue");
 
             migrationBuilder.DropTable(
                 name: "Folders");

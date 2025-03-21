@@ -1,5 +1,5 @@
 ﻿
-Note: Below, requires admin access
+Note: Below steps require admin access
 
 installing the service :
    installutil.exe EnumerateService.exe  
@@ -20,20 +20,6 @@ DB Permissions:
 NT AUTHORITY\SYSTEM must be a user to the database FolderEF 
 
 
-What do we want this service to do ?
-
-1. Get the category list
-2. Get the drive list
-3. Scan each folder for files that match something in the Category List.
-   Add/Update a file in the repo with category, 	
-   Record/update the folder size, last checked date, last modified date  
-4. Do not scan any folder which has been assigned a Category.
-5. Do not scan any folder who's last checked date > last modified date.
-6. Root folder:  Always record/update the folder size, last checked date, last modified date   
-
-Future additions:
-1. Perhaps record the folder names and their size of all sub-root folders.
-
 
 Indexing Algorithm:
 
@@ -49,10 +35,3 @@ Indexing Algorithm:
      Get the folder details/last checked date/time from the repo if it exists.
      Add the folder to the scan queue if required, with priority 4.
 - Call Init() if the scan queue is empty.
-
-
-Consider:
-Step 3: Don't add the sub-folder to scan queue if folder is in repo. 
-ToScanQueue table: add a creation Timestamp field
-
-

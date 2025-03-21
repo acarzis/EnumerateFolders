@@ -27,7 +27,7 @@ namespace EnumerateFolders.Services
         // AddDrive(drive, name, priority) - priority is optional
         // GetFileCategory(fileExtension, out category);
         // FolderExists(folderpath, out folder);
-
+        // FileExists(filepath, out file);
 
         // Non-repository operations (they belong in a different class):
         // EnumerateDrives()
@@ -54,6 +54,7 @@ namespace EnumerateFolders.Services
         bool AddFile(string folderpath, string filepath, string foldercategory = "", string filecategory = "", long filesize = 0);
         bool AddFileDetails(string filepath, string category, long filesize);
         IEnumerable<File> GetAllFiles();
+        bool FileExists(string filepath, out File file);
 
         // for Drive processing
         bool GetDriveList(out IEnumerable<Drive> drives);
@@ -68,5 +69,8 @@ namespace EnumerateFolders.Services
 
         // for determining folder size
         long ComputeFolderSize(string folderpath);
+
+        // for FolderExclusions
+        void GetFolderExclusions(out IEnumerable<FolderExclusions> folderexclusions);
     }
 }

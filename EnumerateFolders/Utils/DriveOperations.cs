@@ -86,7 +86,7 @@ namespace EnumerateFolders.Utils
                     finfo.fileLength = 0;
                     filesinfo.Add(finfo);
                 }
-                catch (System.IO.FileNotFoundException e)
+                catch (FileNotFoundException)
                 {
                     continue;
                 }
@@ -111,7 +111,7 @@ namespace EnumerateFolders.Utils
                     finfo.isDirectory = false;
                     filesinfo.Add(finfo);
                 }
-                catch (System.IO.FileNotFoundException e)
+                catch (FileNotFoundException)
                 {
                     continue;
                 }

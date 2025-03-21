@@ -296,20 +296,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\Drive.cs" />
+    <Compile Include="Entities\FolderExclusions.cs" />
+    <Compile Include="Entities\FolderManager.cs" />
     <Compile Include="Entities\ToScanQueue.cs" />
-    <Compile Include="Migrations\20241106220955_InitialMigration.cs" />
-    <Compile Include="Migrations\20241106220955_InitialMigration.Designer.cs">
-      <DependentUpon>20241106220955_InitialMigration.cs</DependentUpon>
+    <Compile Include="Migrations\20250320223451_Initial.cs" />
+    <Compile Include="Migrations\20250320223451_Initial.Designer.cs">
+      <DependentUpon>20250320223451_Initial.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20241127161220_002.cs" />
-    <Compile Include="Migrations\20241127161220_002.Designer.cs">
-      <DependentUpon>20241127161220_002.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20241127170402_003.cs" />
-    <Compile Include="Migrations\20241127170402_003.Designer.cs">
-      <DependentUpon>20241127170402_003.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\RepositoryCache.cs" />
     <Compile Include="Migrations\SqlSrvCtxModelSnapshot.cs" />
     <Compile Include="Services\Cache\RepositoryCache.cs" />
     <Compile Include="Services\IRepositoryCache.cs" />
