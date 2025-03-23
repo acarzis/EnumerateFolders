@@ -1,5 +1,6 @@
 ﻿2025/1/16 - added support of setting SQLite db location via config file
 2025/3/21 - added FolderManager class
+2025/3/22 - removed FolderManager. Improved folder size determination mechanism
 
 
 To Do list:

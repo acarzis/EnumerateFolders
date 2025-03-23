@@ -297,7 +297,6 @@
   <ItemGroup>
     <Compile Include="Entities\Drive.cs" />
     <Compile Include="Entities\FolderExclusions.cs" />
-    <Compile Include="Entities\FolderManager.cs" />
     <Compile Include="Entities\ToScanQueue.cs" />
     <Compile Include="Migrations\20250320223451_Initial.cs" />
     <Compile Include="Migrations\20250320223451_Initial.Designer.cs">

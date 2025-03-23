@@ -25,9 +25,15 @@ namespace EnumerateFolders.Utils
             return Directory.GetLogicalDrives();
         }
 
-        public static void EnumerateFolders(string path, string searchString, ref List<string> result)
+        public static void EnumerateFolders(string path, string searchString, ref List<string> result, bool recursive = false)
         {
-            var files = from file in Directory.EnumerateDirectories(path, searchString, SearchOption.TopDirectoryOnly)
+            SearchOption searchOption = SearchOption.TopDirectoryOnly;
+            if (recursive)
+            {
+                searchOption = SearchOption.AllDirectories;
+            }
+
+            var files = from file in Directory.EnumerateDirectories(path, searchString, searchOption)
                         select new {
                             File = file
                         };
@@ -39,10 +45,14 @@ namespace EnumerateFolders.Utils
                 };
             }
 
+            catch (UnauthorizedAccessException e)
+            {
+            }
+
             catch (Exception e)
             {
-                Console.WriteLine("EnumerateDrives: " + e.Message);
-                throw e;
+                Console.WriteLine("EnumerateFolders: " + e.Message);
+                throw;
             }
         }
 
@@ -65,7 +75,7 @@ namespace EnumerateFolders.Utils
             catch (Exception e)
             {
                 Console.WriteLine("EnumerateFiles: " + e.Message);
-                throw e;
+                throw;
             }
         }
 

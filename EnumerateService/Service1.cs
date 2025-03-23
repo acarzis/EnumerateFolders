@@ -57,6 +57,7 @@ namespace EnumerateService
         List<Tuple<string, string>> categoryPaths = new List<Tuple<string, string>>();          // fullpath, category name
         List<Tuple<string, string>> categoryExtensions = new List<Tuple<string, string>>();     // extension, category name
         List<string> folderexclusions = new List<string>();
+        IEnumerable<Drive> drives = new List<Drive>();
         string[] locations = { };
 
 
@@ -148,31 +149,15 @@ namespace EnumerateService
                 repo = new FolderInfoRepository();
                 repo.SetAssemblyLocation(Assembly.GetExecutingAssembly().Location);
 
-
                 // TO DO:
-                // get db location
-                // check if DB exists, if not, create a dummy DB
+                //  fix the startup code
+                //  get db location
+                //  check if DB exists, if not, create a DB with default categories
 
-                IEnumerable<Drive> drives = new List<Drive>();
                 repo.GetDriveList(out drives);
                 drives = drives.OrderByDescending(s => s.ScanPriority);
 
-                foreach (Drive d in drives)
-                {
-                    d.LogicalDrive = UNCPath(d.LogicalDrive);
-
-                    if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
-                    {
-                        if (!repo.PathExistsinScanQueue(d.LogicalDrive))
-                        {
-                            repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
-
-#if DEBUG
-                            Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
-#endif
-                        }
-                    }
-                }
+                AddDrivesToScanQueue();
 
                 IEnumerable<FolderExclusions> temp = new List<FolderExclusions>();
                 repo.GetFolderExclusions(out temp);
@@ -183,13 +168,6 @@ namespace EnumerateService
                         folderexclusions.Add(f.FullPath);
                     }
                 }
-
-                FolderManager fm = new FolderManager();
-                fm.PopulateFolderData();
-                fm.PopulateFileData();
-
-                // test code
-                long size1 = fm.ComputeFolderSize("G:\\My Drive");
             }
 
             catch (Exception)
@@ -198,6 +176,30 @@ namespace EnumerateService
             }
             return result;
         }
+
+
+        void AddDrivesToScanQueue()
+        {
+            foreach (Drive d in drives)
+            {
+                d.LogicalDrive = UNCPath(d.LogicalDrive);
+
+                if (d.ScanPriority >= 0)    // '<0' signifies disabled/don't scan it
+                {
+                    if (!repo.PathExistsinScanQueue(d.LogicalDrive))
+                    {
+                        repo.AddPathToScanQueue(d.LogicalDrive, (int)ScanPriority.MEDHIGH); // trailing '\' is not added
+
+#if DEBUG
+                        Console.WriteLine("Adding drive to processing queue:  " + d.LogicalDrive);
+#endif
+                    }
+                }
+            }
+        }
+
+
+
 
 
         /*            
@@ -298,7 +300,6 @@ namespace EnumerateService
                         skip = false;
                     }
 
-
                     bool exists = false;
                     if (repo.FolderExists(fullpath, out Folder tmpfolder))
                     {
@@ -350,9 +351,12 @@ namespace EnumerateService
                             }
                         }
 
-                        if (filelistSize == 0)  // Correction needed: Should be filelist.size()
+                        if (filelist.Count == 0)
                         {
-                            repo.AddFolder(fullpath);
+                            DirectoryInfo ditemp = new DirectoryInfo(fullpath);
+                            long totalFolders = 0;
+                            long totalFiles = 0;
+                            repo.AddFolder(fullpath, "", DriveOperations.GetFolderSize(ditemp, ref totalFiles, ref totalFolders, 1));
                         }
 
                         // add all the sub-folders to the scan queue for future processing
@@ -370,24 +374,10 @@ namespace EnumerateService
 
                         if (folderlist.Count == 0)
                         {
-                            repo.AddFolderDetails(fullpath, String.Empty, filelistSize, DateTime.UtcNow, false);
-
-                            // check the sub-folders of the parent folder. we are checking for folder size presence for all sub-folders
-                            // string parent = Directory.GetParent(fullpath).FullName;
-
-                            // Note: foldersize is determined from the repo entries, NOT from the filesystem.
-                            // FolderManager fm = new FolderManager();
-                            // long foldersize = repo.ComputeFolderSize(parent.FullName);
-
-                            // ** TO DO ** Below is not thoroughly tested
-                            /*
-                            long foldersize = fm.ComputeFolderSize(fullpath);
-                            if (foldersize > 0)
+                            if (Directory.GetParent(fullpath) != null)
                             {
-                                repo.AddFolderDetails(parent, String.Empty, foldersize, DateTime.UtcNow, false);
+                                repo.RecomputeFolderSize(Directory.GetParent(fullpath).FullName);
                             }
-                            eventLog1.WriteEntry("Folder: " + parent + ", computed folder size : " + foldersize.ToString());
-                            */
                         }
 
                         foreach (string f in folderlist)
@@ -483,7 +473,7 @@ namespace EnumerateService
                     {
                         if (repo.GetQueueSize() == 0)
                         {
-                            Init();
+                            AddDrivesToScanQueue();
                         }
                     }
                 }

@@ -155,9 +155,6 @@ namespace EnumerateFolders.Services
                 folder.FolderSize = foldersize;
                 _context.Folders.Add(folder);
                 _context.SaveChanges();
-
-                FolderManager fm = new FolderManager();
-                fm.AddChildFolder(folderpath, folder.Name);                   // TO DO : Verify
                 return true;
             }
             catch (Exception)
@@ -279,25 +276,26 @@ namespace EnumerateFolders.Services
             return true;
         }
 
-        public bool GetAllFolders(out IEnumerable<Folder> folders, string namesearchpattern = "", string pathsearchpattern = "")
+        public bool GetAllFolders(out IEnumerable<Folder> folders, string namesearchpattern = "", string pathbeginswith = "")
         {
+            // sub-folders are also returned because this is method is based on a path search  
             folders = null;
 
             try
             {
                 _context = new SqlSrvCtx();
 
-                if ((!String.IsNullOrEmpty(namesearchpattern)) && (!String.IsNullOrEmpty(pathsearchpattern)))
+                if ((!String.IsNullOrEmpty(namesearchpattern)) && (!String.IsNullOrEmpty(pathbeginswith)))
                 {
-                    folders = _context.Folders.Where(x => x.Name.ToLower().Contains(namesearchpattern.ToLower()) || x.Path.ToLower().Contains(pathsearchpattern.ToLower())).Include(c => c.Category).ToList();
+                    folders = _context.Folders.Where(x => x.Name.ToLower().Contains(namesearchpattern.ToLower()) || x.Path.ToLower().Contains(pathbeginswith.ToLower())).Include(c => c.Category).ToList();
                 }
                 else if (!String.IsNullOrEmpty(namesearchpattern))
                 {
                     folders = _context.Folders.Where(x => x.Name.ToLower().Contains(namesearchpattern.ToLower())).Include(c => c.Category).ToList();
                 }
-                else if (!String.IsNullOrEmpty(pathsearchpattern))
+                else if (!String.IsNullOrEmpty(pathbeginswith))
                 {
-                    folders = _context.Folders.Where(x => x.Path.ToLower().Contains(pathsearchpattern.ToLower())).Include(c => c.Category).ToList();
+                    folders = _context.Folders.Where(x => x.Path.ToLower().Contains(pathbeginswith.ToLower())).Include(c => c.Category).ToList();
                 }
                 else
                 {
@@ -348,7 +346,10 @@ namespace EnumerateFolders.Services
                         }
                     }
 
-                    AddFolder(folderpath, foldercat);
+                    DirectoryInfo di = new DirectoryInfo(folderpath);
+                    long totalFolders = 0;
+                    long totalFiles = 0;
+                    AddFolder(folderpath, foldercat, DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders,  1));
                     FolderExists(folderpath, out folder);
                 }
                 file.Folder = folder;
@@ -369,9 +370,6 @@ namespace EnumerateFolders.Services
                 }
                 _context.Entry(file.Folder).State = EntityState.Unchanged;
                 _context.SaveChanges();
-
-                FolderManager fm = new FolderManager();
-                fm.AddFile(folderpath, filename);                   // TO DO : Verify
                 return true;
             }
             catch (Exception)
@@ -751,6 +749,111 @@ namespace EnumerateFolders.Services
                 file = null;
                 return false;
             }
+        }
+
+        public bool GetAllFolders(out IEnumerable<Folder> folders, string folderpath)
+        {
+            folders = null;
+
+            try
+            {
+                _context = new SqlSrvCtx();
+                if (!String.IsNullOrEmpty(folderpath))
+                {
+                    folders = _context.Folders.Where(x => x.Path.ToLower().Equals(folderpath.ToLower())).Include(c => c.Category).ToList();
+                }
+                else
+                {
+                    folders = _context.Folders.Include(c => c.Category).ToList();
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+
+        public long RecomputeFolderSize(string path)
+        {
+            long foldersize = 0;
+            List<string> folders = new List<string>();
+            Folder temp = new Folder();
+            File tempfile = new File();
+            bool recurse = false;
+
+
+            if (Directory.GetParent(path) == null)
+                return 0;
+
+            try
+            {
+                DriveOperations.EnumerateFolders(path, "*.*", ref folders, recurse);
+                FolderInfoRepository repo = new FolderInfoRepository();
+                IEnumerable<Folder> folderlist = new List<Folder>();
+                repo.GetAllFolders(out folderlist, path);
+
+                foreach (string folder in folders)
+                {
+                    if (repo.FolderExists(folder, out temp))
+                    {
+                        foldersize += temp.FolderSize;
+                    }
+                    else
+                    {
+                        DirectoryInfo di = new DirectoryInfo(folder);
+                        long totalFolders = 0;
+                        long totalFiles = 0;
+                        long totalfoldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1);
+
+                        /*
+                        long totalfilesize = 0;
+                        List<string> filelist = new List<string>();
+                        DriveOperations.EnumerateFiles(folder, "*.*", ref filelist);
+                        foreach (string file in filelist)
+                        {
+                            if (repo.FileExists(file, out tempfile))
+                            {
+                                totalfilesize += tempfile.FileSize;
+                            }
+                            else
+                            {
+                                FileInfo fi = new FileInfo(file);
+                                totalfilesize += fi.Length;
+                            }
+                        }
+                        */
+                        repo.AddFolder(folder);
+                        repo.AddFolderDetails(folder, "", totalfoldersize, di.LastWriteTimeUtc, false);
+                        foldersize += totalfoldersize;
+                    }
+                }
+
+                List<string> files = new List<string>();
+                DriveOperations.EnumerateFiles(path, "*.*", ref files);
+                foreach (string file in files)
+                {
+                    if (repo.FileExists(file, out tempfile))
+                    {
+                        foldersize += tempfile.FileSize;
+                    }
+                    else
+                    {
+                        FileInfo fi = new FileInfo(file);
+                        foldersize += fi.Length;
+                    }
+                }
+
+                repo.AddFolder(path);
+                repo.AddFolderDetails(path, String.Empty, foldersize, DateTime.UtcNow, false);
+            }
+
+            catch (Exception) 
+            {
+                throw;
+            }
+            return foldersize;
         }
     }
 }

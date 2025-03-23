@@ -29,10 +29,10 @@ namespace EnumerateFolders.Services
         // FolderExists(folderpath, out folder);
         // FileExists(filepath, out file);
 
-        // Non-repository operations (they belong in a different class):
+        // Non-repository operations:
         // EnumerateDrives()
         // EnumerateFiles(folder)
-        // GetFolderSize(folder path)
+        // GetFolderSize(folder path) - uses the filesystem to get the folder size, recursively
 
 
         // for Category processing
