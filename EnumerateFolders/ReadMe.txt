@@ -20,25 +20,6 @@ For instance:
 My preference is to not to use methods that return success/fail, rather, use exceptions. 
 
 
-Items which are missing and must be added:
-(DONE)		1. Categories should be permitted to be assigned to a folderpath as well.
-(DONE)		2. Network/mapped drives are not currently supported - this is a serious limitation for those people using a NAS.  
-(DONE)		3. Only files at the root level are currently associated with a category. There should be no folder depth limit.
-			4. The service stop code needs improvement.
-(ONGOING)	5. The 'GUI/front-end' to manage and view the data does not yet exist.
-			6. There is no support for folders/files/categories which have been removed.
-(DONE)		7. GUI - Add a search capability to find files of a specific category
-			8. Overall application performance needs improving
-			9. More GUI features (exclusion lists)
-			10. Cleanup the documentation
-	
-
-
-Possible additional improvements:
-1. I'm not sure how good the approach used for folder/file searching is. Consider: cpu usage and effect to other tasks. 
-2. Add a DB caching layer (but it needs to be justified)
-
-
 
 Some items regarding EF Migrations:
 

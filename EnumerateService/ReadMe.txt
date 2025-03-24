@@ -21,10 +21,12 @@ NT AUTHORITY\SYSTEM must be a user to the database FolderEF
 
 
 
-Indexing Algorithm:
+Application Flow:
 
+- Call Init()
 - Get next queue item - i.e. folder location
 - Get all the files within the folder and add the file to the repo, if not present
+  Compute size of folder if added to repo
 - Add all the sub-folders to the scan queue with priority 2 if not present
   if there are no sub-folders: 
      store the folder size as the sum of all the file sizes
@@ -34,4 +36,4 @@ Indexing Algorithm:
   For each location:
      Get the folder details/last checked date/time from the repo if it exists.
      Add the folder to the scan queue if required, with priority 4.
-- Call Init() if the scan queue is empty.
+- Call AddDrivesToScanQueue() if the scan queue is empty.

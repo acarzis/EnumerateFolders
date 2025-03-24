@@ -238,6 +238,10 @@ namespace EnumerateService
 
                     eventLog1.WriteEntry("Processing : " + Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name));
 
+#if DEBUG
+                    Console.WriteLine("Processing : " + Path.Combine(nextitemtoprocess.Path, nextitemtoprocess.Name));
+#endif
+
                     // refresh category entries once per hour
                     if (DateTime.UtcNow.Subtract(lastCategoryRetrievalTime).TotalMinutes > 60.0)
                     {
@@ -251,13 +255,16 @@ namespace EnumerateService
 
                         foreach (Category category in categories)
                         {
-                            extensions = category.Extensions.Split(',');
-                            foreach (string extension in extensions)
+                            if (!String.IsNullOrEmpty(category.Extensions))
                             {
-                                if (extension != String.Empty)
+                                extensions = category.Extensions.Split(',');
+                                foreach (string extension in extensions)
                                 {
-                                    Tuple<string, string> temp = new Tuple<string, string>(extension, category.Name);
-                                    categoryExtensions.Add(temp);
+                                    if (extension != String.Empty)
+                                    {
+                                        Tuple<string, string> temp = new Tuple<string, string>(extension, category.Name);
+                                        categoryExtensions.Add(temp);
+                                    }
                                 }
                             }
                         }
@@ -395,18 +402,13 @@ namespace EnumerateService
 
                             if ((diInfo.LastWriteTimeUtc >= lastchecked) || (!exsts))
                             {
-                                // temp code - until I figure out a proper fix/new design
-                                if (!repo.FolderExists(f, out Folder tf))
-                                {
-                                    if (!repo.PathExistsinScanQueue(f))
-                                    {
-                                        addedtoQueue = true;
-                                        repo.AddPathToScanQueue(f, (int)ScanPriority.MED);
+                                addedtoQueue = true;
+                                repo.AddPathToScanQueue(f, (int)ScanPriority.MED);
+
 #if DEBUG
-                                        Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
+                                Console.WriteLine("Adding sub-folder location: " + f + " to the scan queue");
 #endif
-                                    }
-                                }
+
                             }
 
                             // update last checked date/time
@@ -452,19 +454,13 @@ namespace EnumerateService
 
                             if ((di.LastWriteTimeUtc >= lastchecked) || (!exists))
                             {
-                                // temp code - until I figure out a proper fix/new design
-                                if (!repo.FolderExists(UNCPath(location), out Folder tf))
-                                {
-                                    if (!repo.PathExistsinScanQueue(UNCPath(location)))
-                                    {
-                                        addedtoQueue = true;
-                                        repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
+                                addedtoQueue = true;
+                                repo.AddPathToScanQueue(UNCPath(location), (int)ScanPriority.HIGH);
 
 #if DEBUG
-                                        Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
+                                Console.WriteLine("Adding category folder location: " + location + " (" + UNCPath(location) + ") to the scan queue");
 #endif
-                                    }
-                                }
+
                             }
                         }
                     }

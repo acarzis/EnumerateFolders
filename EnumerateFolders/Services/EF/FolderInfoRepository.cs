@@ -807,23 +807,6 @@ namespace EnumerateFolders.Services
                         long totalFiles = 0;
                         long totalfoldersize = DriveOperations.GetFolderSize(di, ref totalFiles, ref totalFolders, 1);
 
-                        /*
-                        long totalfilesize = 0;
-                        List<string> filelist = new List<string>();
-                        DriveOperations.EnumerateFiles(folder, "*.*", ref filelist);
-                        foreach (string file in filelist)
-                        {
-                            if (repo.FileExists(file, out tempfile))
-                            {
-                                totalfilesize += tempfile.FileSize;
-                            }
-                            else
-                            {
-                                FileInfo fi = new FileInfo(file);
-                                totalfilesize += fi.Length;
-                            }
-                        }
-                        */
                         repo.AddFolder(folder);
                         repo.AddFolderDetails(folder, "", totalfoldersize, di.LastWriteTimeUtc, false);
                         foldersize += totalfoldersize;
