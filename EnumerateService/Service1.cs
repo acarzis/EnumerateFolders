@@ -327,6 +327,7 @@ namespace EnumerateService
                             repo.RemoveQueueItem(nextitemtoprocess.Id);
                         }
 
+                        bool requireFolderSizeRecompute = false;
                         long filelistSize = 0;
                         foreach (string f in filelist)
                         {
@@ -344,13 +345,28 @@ namespace EnumerateService
                                     catstr = matched.Item2;
                                 }
 
-                                // below will create a folder in the repo if required
-                                repo.AddFile(Path.GetDirectoryName(f), Path.GetFileName(f), String.Empty, catstr, fileInfo.Length);
+                                EnumerateFolders.Entities.File temp;
+                                repo.FileExists(fullpath, out temp);
+
+                                if (temp == null)
+                                {
+                                    requireFolderSizeRecompute = true;
+
+                                    // below will create a folder in the repo if required
+                                    repo.AddFile(Path.GetDirectoryName(f), Path.GetFileName(f), String.Empty, catstr, fileInfo.Length);
 
 #if DEBUG
-                                Console.WriteLine("Adding file, directory: " + Path.GetDirectoryName(f) + ", filename: " + Path.GetFileName(f) + " to the repo");
+                                    Console.WriteLine("Adding file, directory: " + Path.GetDirectoryName(f) + ", filename: " + Path.GetFileName(f) + " to the repo");
 #endif
-
+                                }
+                                else
+                                {
+                                    // compare file sizes
+                                    if (temp.FileSize != fileInfo.Length)
+                                    {
+                                        requireFolderSizeRecompute = true;
+                                    }
+                                }
                             }
                             catch (Exception e)
                             {
@@ -379,14 +395,12 @@ namespace EnumerateService
                             repo.RemoveQueueItem(nextitemtoprocess.Id);
                         }
 
-                        if (folderlist.Count == 0)
+                        if ((folderlist.Count == 0) || (requireFolderSizeRecompute))
                         {
-                            if (Directory.GetParent(fullpath) != null)
-                            {
-                                repo.RecomputeFolderSize(Directory.GetParent(fullpath).FullName);
-                            }
+                            repo.RecomputeFolderSize(fullpath);
                         }
 
+                        requireFolderSizeRecompute = false;
                         foreach (string f in folderlist)
                         {
                             bool exsts = false;
@@ -398,6 +412,10 @@ namespace EnumerateService
                             {
                                 repo.GetFolderDetails(f, out cat, out fldrsize, out lastchecked, out lastmodified);
                                 exsts = true;
+                            }
+                            else
+                            {
+                                requireFolderSizeRecompute = true;
                             }
 
                             if ((diInfo.LastWriteTimeUtc >= lastchecked) || (!exsts))
@@ -413,6 +431,11 @@ namespace EnumerateService
 
                             // update last checked date/time
                             repo.AddFolderDetails(f, String.Empty, 0, diInfo.LastWriteTimeUtc, true);
+                        }
+
+                        if (requireFolderSizeRecompute)
+                        {
+                            repo.RecomputeFolderSize(fullpath);
                         }
                     }
                     repo.RemoveQueueItem(nextitemtoprocess.Id);

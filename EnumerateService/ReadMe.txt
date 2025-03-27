@@ -37,3 +37,17 @@ Application Flow:
      Get the folder details/last checked date/time from the repo if it exists.
      Add the folder to the scan queue if required, with priority 4.
 - Call AddDrivesToScanQueue() if the scan queue is empty.
+
+
+When is a folder's size computed (done via method repo.RecomputeFolderSize):
+
+1. a file changes on the filesystem as compared to the repo/db entry 
+2. if the current folder we are scanning/indexing has no sub-folders
+3. if we add a new folder or file to an existing folder
+4. adding a new folder to the repo/db
+
+
+1. done - only checking differences in size
+2. done
+3. done
+4. done
